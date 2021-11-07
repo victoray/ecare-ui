@@ -3,7 +3,6 @@ import styled from "styled-components/macro";
 import headerImage from "images/header.jpg";
 import Header from "components/Header";
 import Explore from "../../components/Explore";
-import Footer from "../../components/Footer";
 
 const StyledContainer = styled.div``;
 
@@ -25,7 +24,6 @@ const Landing = () => {
       <StyledHeaderImage />
       <Header />
       <Explore />
-      <Footer />
     </StyledContainer>
   );
 };

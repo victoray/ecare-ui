@@ -90,14 +90,11 @@ const Header = () => {
       <StyledText>eCare</StyledText>
 
       <StyledInputGroup>
-        <StyledInput
-          placeholder={"Where do you want this service?"}
-          size={"large"}
-        />
+        <StyledInput placeholder={"Where do you want this service?"} />
         <Divider type="vertical" />
-        <StyledInput size={"large"} placeholder={"Health care provider"} />
+        <StyledInput placeholder={"Health care provider"} />
         <Divider type="vertical" />
-        <StyledInput as={RangePicker} size={"large"} />
+        <StyledInput as={RangePicker} />
 
         <StyledButton icon={<SearchOutlined />} type={"primary"} size={"large"}>
           Search

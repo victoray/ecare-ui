@@ -32,7 +32,7 @@ const StyledInputGroup = styled.div`
   justify-content: center;
   align-items: center;
   background-color: white;
-  padding: 10px;
+  padding: 5px;
 `;
 
 const StyledInput = styled(Input).attrs({
@@ -96,7 +96,7 @@ const Header = () => {
         <Divider type="vertical" />
         <StyledInput as={RangePicker} />
 
-        <StyledButton icon={<SearchOutlined />} type={"primary"} size={"large"}>
+        <StyledButton icon={<SearchOutlined />} type={"primary"}>
           Search
         </StyledButton>
       </StyledInputGroup>

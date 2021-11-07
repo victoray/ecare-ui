@@ -1,13 +1,21 @@
 import React from "react";
 import "./App.less";
 import Landing from "./views/Landing";
-import Header from "./components/Header";
+
+import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
+
+enum Routes {
+  Landing = "/",
+}
 
 function App() {
   return (
     <div className="App">
-      <Header />
-      <Landing />
+      <Router>
+        <Switch>
+          <Route path={Routes.Landing} component={Landing} />
+        </Switch>
+      </Router>
     </div>
   );
 }

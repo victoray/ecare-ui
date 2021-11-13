@@ -1,4 +1,4 @@
-import React from "react";
+import React, { FC } from "react";
 import styled from "styled-components/macro";
 import {
   Avatar,
@@ -8,16 +8,18 @@ import {
   Dropdown,
   Input,
   Menu,
+  Select,
   Space,
   Typography,
 } from "antd";
 import { MenuOutlined, SearchOutlined, UserOutlined } from "@ant-design/icons";
+import { healthCareProviders } from "../../constants";
 
 const { RangePicker } = DatePicker;
 
-const StyledContainer = styled.div`
+const StyledContainer = styled.div<{ position?: string }>`
   padding: 10px 60px;
-  position: fixed;
+  position: ${(props) => props.position || "fixed"};
   top: 0;
   width: 100vw;
   display: flex;
@@ -84,15 +86,23 @@ const StyledText = styled(Typography.Title)`
   }
 `;
 
-const Header = () => {
+type HeaderProps = {
+  position?: "relative" | "absolute" | "fixed";
+};
+
+const Header: FC<HeaderProps> = ({ position }) => {
   return (
-    <StyledContainer>
+    <StyledContainer position={position}>
       <StyledText>eCare</StyledText>
 
       <StyledInputGroup>
         <StyledInput placeholder={"Where do you want this service?"} />
         <Divider type="vertical" />
-        <StyledInput placeholder={"Health care provider"} />
+        <StyledInput
+          as={Select}
+          options={healthCareProviders}
+          placeholder={"Health care provider"}
+        />
         <Divider type="vertical" />
         <StyledInput as={RangePicker} />
 

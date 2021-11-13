@@ -2,7 +2,7 @@ import React from "react";
 import styled from "styled-components/macro";
 import headerImage from "images/header.jpg";
 import Header from "components/Header";
-import Explore from "../../components/Explore";
+import Explore from "components/Explore";
 
 const StyledContainer = styled.div``;
 

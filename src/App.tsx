@@ -4,22 +4,22 @@ import Landing from "./views/Landing";
 import Search from "./views/Search";
 
 import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
-import Header from "./components/Header";
 import Footer from "./components/Footer";
+import Services from "./views/Services";
 
 enum Routes {
   Landing = "/",
   Search = "/search",
+  Services = "/services",
 }
 
 function App() {
   return (
     <div className="App">
       <Router>
-        <Header />
-
         <Switch>
           <Route path={Routes.Search} component={Search} />
+          <Route path={Routes.Services} component={Services} />
           <Route path={Routes.Landing} component={Landing} />
         </Switch>
 

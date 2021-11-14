@@ -15,6 +15,8 @@ import {
 import { MenuOutlined, SearchOutlined, UserOutlined } from "@ant-design/icons";
 import { healthCareProviders } from "../../constants";
 import Search from "./Search";
+import { useDispatch } from "react-redux";
+import { showLoginModal, showSignUpModal } from "../../store/auth";
 
 const { RangePicker } = DatePicker;
 
@@ -48,39 +50,6 @@ const StyledButton = styled(Button)`
   border-radius: 50px;
 `;
 
-const menu = (
-  <Menu>
-    <Menu.Item>
-      <a
-        target="_blank"
-        rel="noopener noreferrer"
-        href="https://www.antgroup.com"
-      >
-        Sign up
-      </a>
-    </Menu.Item>
-    <Menu.Item>
-      <a
-        target="_blank"
-        rel="noopener noreferrer"
-        href="https://www.aliyun.com"
-      >
-        Login
-      </a>
-    </Menu.Item>
-    <Divider />
-    <Menu.Item>
-      <a
-        target="_blank"
-        rel="noopener noreferrer"
-        href="https://www.luohanacademy.com"
-      >
-        Help
-      </a>
-    </Menu.Item>
-  </Menu>
-);
-
 const StyledText = styled(Typography.Title)`
   && {
     color: whitesmoke;
@@ -92,6 +61,14 @@ type HeaderProps = {
 };
 
 const Header: FC<HeaderProps> = ({ position }) => {
+  const dispatch = useDispatch();
+  const menu = (
+    <Menu>
+      <Menu.Item onClick={() => dispatch(showSignUpModal())}>Sign up</Menu.Item>
+      <Menu.Item onClick={() => dispatch(showLoginModal())}>Login</Menu.Item>
+    </Menu>
+  );
+
   return (
     <StyledContainer position={position}>
       <StyledText>eCare</StyledText>

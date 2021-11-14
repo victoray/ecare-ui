@@ -26,17 +26,21 @@ const commonConfig: AxiosRequestConfig = {
 
 export class Api {
   client: AxiosInstance;
+  publicClient: AxiosInstance;
   private token: string;
 
   constructor(token: string) {
     this.token = token;
 
+    this.publicClient = axios.create(commonConfig);
     this.client = axios.create({
       ...commonConfig,
       headers: {
         Authorization: `JWT ${token}`,
       },
     });
+    this.client.interceptors.response.use((response) => response.data);
+    this.publicClient.interceptors.response.use((response) => response.data);
   }
 }
 

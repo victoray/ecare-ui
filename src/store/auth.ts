@@ -11,6 +11,7 @@ export type User = {
   legalName: string | null;
   profileImage: string | null;
   role: string | null;
+  roleType: "provider" | "patient" | null;
   username: string;
 };
 export type AuthState = {
@@ -83,3 +84,5 @@ export const selectIsSignedIn = (state: RootState) => {
   return Boolean(selectToken(state));
 };
 export const selectUser = (state: RootState) => state.auth.user;
+export const selectIsProvider = (state: RootState) =>
+  state.auth.user?.roleType === "provider";

@@ -3,13 +3,11 @@ import styled from "styled-components/macro";
 import {
   Avatar,
   Button,
-  DatePicker,
   Divider,
   Dropdown,
   Input,
   Menu,
   Select,
-  Space,
   Typography,
 } from "antd";
 import { MenuOutlined, SearchOutlined, UserOutlined } from "@ant-design/icons";
@@ -17,6 +15,7 @@ import { healthCareProviders } from "../../constants";
 import Search from "./Search";
 import { useDispatch, useSelector } from "react-redux";
 import {
+  selectIsProvider,
   selectIsSignedIn,
   showLoginModal,
   showSignUpModal,
@@ -24,8 +23,7 @@ import {
 import { useMutation } from "react-query";
 import { getAuth, signOut } from "firebase/auth";
 import { useHistory } from "react-router";
-
-const { RangePicker } = DatePicker;
+import { Link } from "react-router-dom";
 
 const StyledContainer = styled.div<{ position?: string }>`
   padding: 10px 60px;
@@ -34,6 +32,7 @@ const StyledContainer = styled.div<{ position?: string }>`
   width: 100vw;
   display: flex;
   align-items: center;
+  justify-content: space-between;
 `;
 
 const StyledInputGroup = styled.div`
@@ -57,19 +56,26 @@ const StyledButton = styled(Button)`
   border-radius: 50px;
 `;
 
-const StyledText = styled(Typography.Title)`
+const StyledText = styled(Typography.Title)<{ textColor?: string }>`
   && {
-    color: whitesmoke;
+    color: ${(props) => props.textColor || "#40a9ff"};
   }
 `;
 
 type HeaderProps = {
   position?: "relative" | "absolute" | "fixed";
+  showSearch?: boolean;
+  textColor?: string;
 };
 
-const Header: FC<HeaderProps> = ({ position }) => {
+const Header: FC<HeaderProps> = ({
+  position,
+  showSearch = true,
+  textColor,
+}) => {
   const dispatch = useDispatch();
   const isSignedIn = useSelector(selectIsSignedIn);
+  const isProvider = useSelector(selectIsProvider);
   const history = useHistory();
 
   const { mutate: logout } = useMutation(() => {
@@ -81,6 +87,27 @@ const Header: FC<HeaderProps> = ({ position }) => {
     <Menu>
       {isSignedIn ? (
         <Fragment>
+          {isProvider && (
+            <Fragment>
+              <Menu.Item
+                onClick={() => history.push("/services")}
+                key={"service"}
+              >
+                My services
+              </Menu.Item>
+              <Menu.Item
+                onClick={() => history.push("/calendar")}
+                key={"calendar"}
+              >
+                Calendar
+              </Menu.Item>
+            </Fragment>
+          )}
+
+          <Menu.Item onClick={() => history.push("/account")} key={"account"}>
+            Inbox
+          </Menu.Item>
+          <Divider />
           <Menu.Item onClick={() => history.push("/account")} key={"account"}>
             Account
           </Menu.Item>
@@ -103,36 +130,36 @@ const Header: FC<HeaderProps> = ({ position }) => {
 
   return (
     <StyledContainer position={position}>
-      <StyledText>eCare</StyledText>
+      <Link to={"/"}>
+        <StyledText textColor={textColor}>eCare</StyledText>
+      </Link>
 
-      <StyledInputGroup>
-        <StyledInput as={Search} />
-        <Divider type="vertical" />
-        <StyledInput
-          as={Select}
-          options={healthCareProviders}
-          placeholder={"Health care provider"}
-        />
-        <Divider type="vertical" />
+      {showSearch && (
+        <StyledInputGroup>
+          <StyledInput as={Search} />
+          <Divider type="vertical" />
+          <StyledInput
+            as={Select}
+            options={healthCareProviders}
+            placeholder={"Health care provider"}
+          />
+          <Divider type="vertical" />
 
-        <StyledButton icon={<SearchOutlined />} type={"primary"}>
-          Search
-        </StyledButton>
-      </StyledInputGroup>
-
-      <Space>
-        <Button type={"link"}>Become a care provider</Button>
-
-        <Dropdown overlay={menu} overlayStyle={{ width: 250 }}>
-          <StyledButton icon={<MenuOutlined />} size={"large"}>
-            <Avatar
-              size={24}
-              src={"https://joeschmoe.io/api/v1/random"}
-              icon={<UserOutlined />}
-            />
+          <StyledButton icon={<SearchOutlined />} type={"primary"}>
+            Search
           </StyledButton>
-        </Dropdown>
-      </Space>
+        </StyledInputGroup>
+      )}
+
+      <Dropdown overlay={menu} overlayStyle={{ width: 250 }}>
+        <StyledButton icon={<MenuOutlined />} size={"large"}>
+          <Avatar
+            size={24}
+            src={"https://joeschmoe.io/api/v1/random"}
+            icon={<UserOutlined />}
+          />
+        </StyledButton>
+      </Dropdown>
     </StyledContainer>
   );
 };

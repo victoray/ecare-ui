@@ -6,15 +6,24 @@ import {
   Form,
   Input,
   Row,
+  Select,
   Typography,
 } from "antd";
 import Header from "../../components/Header";
 import styled from "styled-components/macro";
 import { useSelector } from "react-redux";
 import { selectUser, User } from "../../store/auth";
-import { useMutation } from "react-query";
+import { useMutation, useQuery } from "react-query";
 import { useApi } from "../../api";
 import moment from "moment";
+
+type Role = {
+  created_at: string;
+  name: string;
+  type: string;
+  updated_at: string;
+  url: string;
+};
 
 const StyledContent = styled.div`
   margin: 0 auto;
@@ -42,6 +51,10 @@ const Account = () => {
     }
   }, [form, user]);
 
+  const { data: roles } = useQuery("roles", () =>
+    api.publicClient.get<string, Array<Role>>("/roles/")
+  );
+
   const { mutateAsync: updateUser } = useMutation((data: Partial<User>) => {
     const formattedData = { ...data };
     if (formattedData.dateOfBirth) {
@@ -54,7 +67,7 @@ const Account = () => {
 
   return (
     <div>
-      <Header position={"relative"} />
+      <Header position={"relative"} showSearch={false} textColor={"#40a9ff"} />
 
       <StyledContent>
         <Typography.Title>Account Info</Typography.Title>
@@ -63,12 +76,7 @@ const Account = () => {
         </Typography.Text>
         <Divider />
 
-        <Form
-          form={form}
-          layout={"vertical"}
-          initialValues={{ ...user }}
-          onFinish={updateUser}
-        >
+        <Form form={form} layout={"vertical"} onFinish={updateUser}>
           <Form.Item name={"legalName"} label={<strong>Name</strong>}>
             <Input />
           </Form.Item>
@@ -91,7 +99,7 @@ const Account = () => {
             name={"governmentId"}
             label={<strong>Government ID</strong>}
           >
-            <Input disabled={Boolean(user?.dateOfBirth)} />
+            <Input disabled={Boolean(user?.governmentId)} />
           </Form.Item>
 
           <Form.Item
@@ -103,6 +111,16 @@ const Account = () => {
 
           <Form.Item name={"address"} label={<strong>Address</strong>}>
             <Input />
+          </Form.Item>
+
+          <Form.Item name={"role"} label={<strong>Account type</strong>}>
+            <Select
+              disabled={Boolean(user?.role)}
+              options={roles?.map((role) => ({
+                value: role.url,
+                label: role.name,
+              }))}
+            />
           </Form.Item>
 
           <Row justify={"end"}>

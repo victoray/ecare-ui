@@ -15,6 +15,7 @@ import {
   selectShowSignUp,
   setToken,
   setUser,
+  User,
 } from "./store/auth";
 import { Button, Form, Input, message, Modal, Typography } from "antd";
 import { useMutation } from "react-query";
@@ -54,8 +55,7 @@ const SignUpModal: FC<{ visible: boolean }> = ({ visible }) => {
 
           const api = new Api(token);
 
-          api.client.get(`/users/${user.uid}/`).then((response) => {
-            const user = response.data;
+          api.client.get<string, User>(`/users/${user.uid}/`).then((user) => {
             dispatch(setUser(user));
 
             if (!user.role) {
@@ -118,9 +118,8 @@ const LoginModal: FC<{ visible: boolean }> = ({ visible }) => {
           const api = new Api(token);
 
           api.client
-            .get(`/users/${user.uid}/`)
-            .then((response) => {
-              const user = response.data;
+            .get<string, User>(`/users/${user.uid}/`)
+            .then((user) => {
               dispatch(setUser(user));
               if (!user.role) {
                 history.push(Routes.Account);
@@ -180,9 +179,11 @@ function App() {
 
         const api = new Api(token);
 
-        api.client.get(`/users/${user.uid}/`).then((response) => {
-          const user = response.data;
+        api.client.get<string, User>(`/users/${user.uid}/`).then((user) => {
           dispatch(setUser(user));
+          if (!user.role && !window.location.href.includes(Routes.Account)) {
+            window.location.assign(Routes.Account);
+          }
         });
       });
       // ...

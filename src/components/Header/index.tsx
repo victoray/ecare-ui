@@ -17,6 +17,7 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   selectIsProvider,
   selectIsSignedIn,
+  selectUser,
   showLoginModal,
   showSignUpModal,
 } from "../../store/auth";
@@ -73,6 +74,7 @@ const Header: FC<HeaderProps> = ({
   showSearch = true,
   textColor,
 }) => {
+  const user = useSelector(selectUser);
   const dispatch = useDispatch();
   const isSignedIn = useSelector(selectIsSignedIn);
   const isProvider = useSelector(selectIsProvider);
@@ -155,7 +157,7 @@ const Header: FC<HeaderProps> = ({
         <StyledButton icon={<MenuOutlined />} size={"large"}>
           <Avatar
             size={24}
-            src={"https://joeschmoe.io/api/v1/random"}
+            src={user?.profileImage || "https://joeschmoe.io/api/v1/random"}
             icon={<UserOutlined />}
           />
         </StyledButton>

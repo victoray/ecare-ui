@@ -1,21 +1,28 @@
-import React, { useEffect } from "react";
+import React, { FC, ReactNode, useEffect, useState } from "react";
 import {
+  Avatar,
   Button,
   DatePicker,
   Divider,
   Form,
+  Image,
   Input,
   Row,
   Select,
+  Space,
   Typography,
+  Upload,
 } from "antd";
 import Header from "../../components/Header";
 import styled from "styled-components/macro";
-import { useSelector } from "react-redux";
-import { selectUser, User } from "../../store/auth";
+import { useDispatch, useSelector } from "react-redux";
+import { selectUser, setUser, User } from "../../store/auth";
 import { useMutation, useQuery } from "react-query";
 import { useApi } from "../../api";
 import moment from "moment";
+import { UploadOutlined, UserOutlined } from "@ant-design/icons";
+import { RcFile } from "antd/es/upload";
+import axios from "axios";
 
 type Role = {
   created_at: string;
@@ -34,10 +41,56 @@ const StyledDatePicker = styled(DatePicker)`
   width: 100%;
 `;
 
+type ImageFieldProps = {
+  onChange(value: string): void;
+  editable?: boolean;
+  imageRender?: ReactNode;
+};
+const ImageField: FC<ImageFieldProps> = ({
+  onChange,
+  editable = true,
+  imageRender,
+}) => {
+  const uploadFileToCloudinary = (file: RcFile) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("api_key", "366417255826682");
+    formData.append("upload_preset", "a9arz1lk");
+
+    return axios
+      .post("https://api.cloudinary.com/v1_1/odinson/image/upload", formData)
+      .then((response) => {
+        onChange(response.data.url);
+      });
+  };
+
+  return (
+    <Space>
+      {imageRender}
+      {editable && (
+        <Upload
+          customRequest={({ onSuccess, onError, file, onProgress }) => {
+            uploadFileToCloudinary(file as RcFile)
+              .then(() => onSuccess?.("Ok"))
+              .catch(onError);
+          }}
+          showUploadList={false}
+        >
+          <Button icon={<UploadOutlined />}>Click to upload</Button>
+        </Upload>
+      )}
+    </Space>
+  );
+};
+
 const Account = () => {
+  const dispatch = useDispatch();
   const api = useApi();
   const user = useSelector(selectUser);
   const [form] = Form.useForm();
+
+  const [profileImage, setProfileImage] = useState<string | null>();
+  const [governmentId, setGovernmentId] = useState<string | null>();
 
   useEffect(() => {
     if (user) {
@@ -47,6 +100,8 @@ const Account = () => {
       if (initialValues.dateOfBirth) {
         initialValues.dateOfBirth = moment(initialValues.dateOfBirth);
       }
+      setProfileImage(user?.profileImage);
+      setGovernmentId(user?.governmentId);
       form.setFieldsValue(initialValues);
     }
   }, [form, user]);
@@ -55,15 +110,24 @@ const Account = () => {
     api.publicClient.get<string, Array<Role>>("/roles/")
   );
 
-  const { mutateAsync: updateUser } = useMutation((data: Partial<User>) => {
-    const formattedData = { ...data };
-    if (formattedData.dateOfBirth) {
-      formattedData.dateOfBirth = moment(formattedData.dateOfBirth).format(
-        "YYYY-MM-DD"
-      );
+  const { mutateAsync: updateUser } = useMutation(
+    (data: Partial<User>) => {
+      const formattedData = { ...data };
+      if (formattedData.dateOfBirth) {
+        formattedData.dateOfBirth = moment(formattedData.dateOfBirth).format(
+          "YYYY-MM-DD"
+        );
+      }
+      return api.client.put<any, User>(`/users/${user?.uuid}/`, {
+        ...formattedData,
+      });
+    },
+    {
+      onSuccess: (user) => {
+        dispatch(setUser(user));
+      },
     }
-    return api.client.put(`/users/${user?.uuid}/`, { ...formattedData });
-  });
+  );
 
   return (
     <div>
@@ -77,6 +141,26 @@ const Account = () => {
         <Divider />
 
         <Form form={form} layout={"vertical"} onFinish={updateUser}>
+          <Form.Item
+            name={"profileImage"}
+            label={<strong>Profile Image</strong>}
+          >
+            <ImageField
+              onChange={(value) => {
+                form.setFieldsValue({ profileImage: value });
+                setProfileImage(value);
+              }}
+              imageRender={
+                profileImage && (
+                  <Avatar
+                    size={96}
+                    icon={<UserOutlined />}
+                    src={profileImage}
+                  />
+                )
+              }
+            />
+          </Form.Item>
           <Form.Item name={"legalName"} label={<strong>Name</strong>}>
             <Input />
           </Form.Item>
@@ -99,7 +183,15 @@ const Account = () => {
             name={"governmentId"}
             label={<strong>Government ID</strong>}
           >
-            <Input disabled={Boolean(user?.governmentId)} />
+            <ImageField
+              onChange={(value) => {
+                setGovernmentId(value);
+                form.setFieldsValue({ governmentId: value });
+              }}
+              imageRender={
+                governmentId && <Image width={300} src={governmentId} />
+              }
+            />
           </Form.Item>
 
           <Form.Item

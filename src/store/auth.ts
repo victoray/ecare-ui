@@ -1,10 +1,23 @@
 import { createAction, createReducer } from "@reduxjs/toolkit";
 import type { RootState } from "./index";
 
+export type User = {
+  uuid: string;
+  email: string;
+  dateOfBirth: string | null;
+  emergencyContact: string | null;
+  gender: string | null;
+  governmentId: string | null;
+  legalName: string | null;
+  profileImage: string | null;
+  role: string | null;
+  username: string;
+};
 export type AuthState = {
   showSignUp: boolean;
   showLogin: boolean;
   token: string;
+  user: User | null;
 };
 
 export const showSignUpModal = createAction("AUTH/SHOW_SIGN_UP_MODAL");
@@ -13,11 +26,13 @@ export const showLoginModal = createAction("AUTH/SHOW_LOGIN_MODAL");
 export const hideLoginModal = createAction("AUTH/HIDE_LOGIN_MODAL");
 export const setToken = createAction<string>("AUTH/SET_TOKEN");
 export const clearToken = createAction("AUTH/CLEAR_TOKEN");
+export const setUser = createAction<User>("AUTH/SET_USER");
 
 const initialState: AuthState = {
   showSignUp: false,
   showLogin: false,
   token: "",
+  user: null,
 };
 
 export const authReducer = createReducer<AuthState>(initialState, (builder) => {
@@ -50,6 +65,13 @@ export const authReducer = createReducer<AuthState>(initialState, (builder) => {
       return {
         ...state,
         token: payload,
+        user: !payload ? null : state.user,
+      };
+    })
+    .addCase(setUser, (state, { payload }) => {
+      return {
+        ...state,
+        user: payload,
       };
     });
 });
@@ -60,3 +82,4 @@ export const selectToken = (state: RootState) => state.auth.token;
 export const selectIsSignedIn = (state: RootState) => {
   return Boolean(selectToken(state));
 };
+export const selectUser = (state: RootState) => state.auth.user;

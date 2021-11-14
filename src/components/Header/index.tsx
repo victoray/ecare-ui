@@ -23,6 +23,7 @@ import {
 } from "../../store/auth";
 import { useMutation } from "react-query";
 import { getAuth, signOut } from "firebase/auth";
+import { useHistory } from "react-router";
 
 const { RangePicker } = DatePicker;
 
@@ -66,68 +67,73 @@ type HeaderProps = {
   position?: "relative" | "absolute" | "fixed";
 };
 
-const Header: FC<HeaderProps> = ({position}) => {
+const Header: FC<HeaderProps> = ({ position }) => {
   const dispatch = useDispatch();
   const isSignedIn = useSelector(selectIsSignedIn);
+  const history = useHistory();
 
-  const {mutate: logout} = useMutation(() => {
+  const { mutate: logout } = useMutation(() => {
     const auth = getAuth();
     return signOut(auth);
   });
 
   const menu = (
-      <Menu>
-        {isSignedIn ? (
-            <Menu.Item onClick={() => logout()} key={"login"}>
-              Logout
-            </Menu.Item>
-        ) : (
-            <Fragment>
-              <Menu.Item onClick={() => dispatch(showSignUpModal())} key={"signUp"}>
-                Sign up
-              </Menu.Item>
-              <Menu.Item onClick={() => dispatch(showLoginModal())} key={"login"}>
-                Login
-              </Menu.Item>
-            </Fragment>
-        )}
-      </Menu>
+    <Menu>
+      {isSignedIn ? (
+        <Fragment>
+          <Menu.Item onClick={() => history.push("/account")} key={"account"}>
+            Account
+          </Menu.Item>
+          <Menu.Item onClick={() => logout()} key={"login"}>
+            Logout
+          </Menu.Item>
+        </Fragment>
+      ) : (
+        <Fragment>
+          <Menu.Item onClick={() => dispatch(showSignUpModal())} key={"signUp"}>
+            Sign up
+          </Menu.Item>
+          <Menu.Item onClick={() => dispatch(showLoginModal())} key={"login"}>
+            Login
+          </Menu.Item>
+        </Fragment>
+      )}
+    </Menu>
   );
 
   return (
-      <StyledContainer position={position}>
-        <StyledText>eCare</StyledText>
+    <StyledContainer position={position}>
+      <StyledText>eCare</StyledText>
 
-        <StyledInputGroup>
-          <StyledInput as={Search}/>
-          <Divider type="vertical"/>
-          <StyledInput
-              as={Select}
-              options={healthCareProviders}
-              placeholder={"Health care provider"}
-          />
-          <Divider type="vertical"/>
-          <StyledInput as={RangePicker}/>
+      <StyledInputGroup>
+        <StyledInput as={Search} />
+        <Divider type="vertical" />
+        <StyledInput
+          as={Select}
+          options={healthCareProviders}
+          placeholder={"Health care provider"}
+        />
+        <Divider type="vertical" />
 
-          <StyledButton icon={<SearchOutlined/>} type={"primary"}>
-            Search
+        <StyledButton icon={<SearchOutlined />} type={"primary"}>
+          Search
+        </StyledButton>
+      </StyledInputGroup>
+
+      <Space>
+        <Button type={"link"}>Become a care provider</Button>
+
+        <Dropdown overlay={menu} overlayStyle={{ width: 250 }}>
+          <StyledButton icon={<MenuOutlined />} size={"large"}>
+            <Avatar
+              size={24}
+              src={"https://joeschmoe.io/api/v1/random"}
+              icon={<UserOutlined />}
+            />
           </StyledButton>
-        </StyledInputGroup>
-
-        <Space>
-          <Button type={"link"}>Become a care provider</Button>
-
-          <Dropdown overlay={menu} overlayStyle={{width: 250}}>
-            <StyledButton icon={<MenuOutlined/>} size={"large"}>
-              <Avatar
-                  size={24}
-                  src={"https://joeschmoe.io/api/v1/random"}
-                  icon={<UserOutlined/>}
-              />
-            </StyledButton>
-          </Dropdown>
-        </Space>
-      </StyledContainer>
+        </Dropdown>
+      </Space>
+    </StyledContainer>
   );
 };
 

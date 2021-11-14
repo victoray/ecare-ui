@@ -14,6 +14,7 @@ import {
   selectShowLogin,
   selectShowSignUp,
   setToken,
+  setUser,
 } from "./store/auth";
 import { Button, Form, Input, message, Modal, Typography } from "antd";
 import { useMutation } from "react-query";
@@ -23,15 +24,21 @@ import {
   onAuthStateChanged,
   signInWithEmailAndPassword,
 } from "firebase/auth";
+import { Api } from "./api";
+import Account from "./views/Account";
+import { useHistory } from "react-router";
 
 enum Routes {
   Landing = "/",
   Search = "/search",
   Services = "/services",
+  Account = "/account",
 }
 
 const SignUpModal: FC<{ visible: boolean }> = ({ visible }) => {
   const dispatch = useDispatch();
+  const history = useHistory();
+
   const { mutate: signUp, isLoading } = useMutation(
     ([email, password]: [string, string]) => {
       const auth = getAuth();
@@ -39,8 +46,23 @@ const SignUpModal: FC<{ visible: boolean }> = ({ visible }) => {
       return createUserWithEmailAndPassword(auth, email, password);
     },
     {
-      onSuccess: () => {
+      onSuccess: ({ user }) => {
         dispatch(hideSignUpModal());
+
+        user.getIdToken().then((token) => {
+          dispatch(setToken(token));
+
+          const api = new Api(token);
+
+          api.client.get(`/users/${user.uid}/`).then((response) => {
+            const user = response.data;
+            dispatch(setUser(user));
+
+            if (!user.role) {
+              history.push(Routes.Account);
+            }
+          });
+        });
       },
       onError: (error: any) => {
         message.error(error?.message || "Sign up failed");
@@ -53,9 +75,16 @@ const SignUpModal: FC<{ visible: boolean }> = ({ visible }) => {
       onCancel={() => dispatch(hideSignUpModal())}
       centered
       footer={null}
+      destroyOnClose
     >
       <Typography.Title level={3}> Sign Up</Typography.Title>
-      <Form onFinish={(values) => signUp([values.email, values.password])}>
+      <Form
+        initialValues={{
+          email: "odinodin161@gmail.com",
+          password: "Nnaemeka@07",
+        }}
+        onFinish={(values) => signUp([values.email, values.password])}
+      >
         <Form.Item name={"email"}>
           <Input type={"email"} placeholder={"Email Address"} required />
         </Form.Item>
@@ -73,6 +102,7 @@ const SignUpModal: FC<{ visible: boolean }> = ({ visible }) => {
 
 const LoginModal: FC<{ visible: boolean }> = ({ visible }) => {
   const dispatch = useDispatch();
+  const history = useHistory();
 
   const { mutate: signIn, isLoading } = useMutation(
     ([email, password]: [string, string]) => {
@@ -81,8 +111,23 @@ const LoginModal: FC<{ visible: boolean }> = ({ visible }) => {
       return signInWithEmailAndPassword(auth, email, password);
     },
     {
-      onSuccess: () => {
-        dispatch(hideLoginModal());
+      onSuccess: ({ user }) => {
+        user.getIdToken().then((token) => {
+          dispatch(setToken(token));
+
+          const api = new Api(token);
+
+          api.client
+            .get(`/users/${user.uid}/`)
+            .then((response) => {
+              const user = response.data;
+              dispatch(setUser(user));
+              if (!user.role) {
+                history.push(Routes.Account);
+              }
+            })
+            .then(() => dispatch(hideLoginModal()));
+        });
       },
       onError: (error: any) => {
         message.error(error?.message || "Login failed");
@@ -96,10 +141,17 @@ const LoginModal: FC<{ visible: boolean }> = ({ visible }) => {
       onCancel={() => dispatch(hideLoginModal())}
       centered
       footer={null}
+      destroyOnClose
     >
       <Typography.Title level={3}>Login</Typography.Title>
 
-      <Form onFinish={(values) => signIn([values.email, values.password])}>
+      <Form
+        initialValues={{
+          email: "odinodin161@gmail.com",
+          password: "Nnaemeka@07",
+        }}
+        onFinish={(values) => signIn([values.email, values.password])}
+      >
         <Form.Item name={"email"}>
           <Input type={"email"} placeholder={"Email Address"} required />
         </Form.Item>
@@ -125,6 +177,13 @@ function App() {
     if (user) {
       user.getIdToken().then((token) => {
         dispatch(setToken(token));
+
+        const api = new Api(token);
+
+        api.client.get(`/users/${user.uid}/`).then((response) => {
+          const user = response.data;
+          dispatch(setUser(user));
+        });
       });
       // ...
     } else {
@@ -138,6 +197,7 @@ function App() {
         <SignUpModal visible={showSignUpModal} />
         <LoginModal visible={showLoginModal} />
         <Switch>
+          <Route path={Routes.Account} component={Account} />
           <Route path={Routes.Search} component={Search} />
           <Route path={Routes.Services} component={Services} />
           <Route path={Routes.Landing} component={Landing} />

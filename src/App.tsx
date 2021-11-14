@@ -2,11 +2,11 @@ import React, { FC } from "react";
 import "./App.less";
 import "./firebaseConfig";
 import Landing from "./views/Landing";
-import Search from "./views/Search";
+import Services from "./views/Services";
 
 import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 import Footer from "./components/Footer";
-import Services from "./views/Services";
+import Search from "./views/Search";
 import { useDispatch, useSelector } from "react-redux";
 import {
   hideLoginModal,
@@ -28,12 +28,14 @@ import {
 import { Api } from "./api";
 import Account from "./views/Account";
 import { useHistory } from "react-router";
+import Calendar from "./views/Calendar";
 
 enum Routes {
   Landing = "/",
   Search = "/search",
   Services = "/services",
   Account = "/account",
+  Calendar = "/calendar",
 }
 
 const SignUpModal: FC<{ visible: boolean }> = ({ visible }) => {
@@ -199,6 +201,7 @@ function App() {
         <LoginModal visible={showLoginModal} />
         <Switch>
           <Route path={Routes.Account} component={Account} />
+          <Route path={Routes.Calendar} component={Calendar} />
           <Route path={Routes.Search} component={Search} />
           <Route path={Routes.Services} component={Services} />
           <Route path={Routes.Landing} component={Landing} />

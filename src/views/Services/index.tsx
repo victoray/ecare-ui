@@ -1,35 +1,53 @@
 import React from "react";
-import { Col, Row } from "antd";
-import Header from "../../components/Header";
+import { Card, Col, Row, Tabs } from "antd";
 import styled from "styled-components/macro";
+import faker from "faker";
 import { times } from "lodash";
-import "mapbox-gl/dist/mapbox-gl.css";
-import Map from "./Map";
-import Service, { service } from "./Service";
+import { healthCareProviders } from "../../constants";
+import Header from "../../components/Header";
 
-const StyledMapContainer = styled(Col)`
-  background-color: gray;
+const service = () => ({
+  title: faker.name.findName(),
+  location: faker.address.cityName(),
+  description: faker.commerce.productDescription(),
+  images: ["https://joeschmoe.io/api/v1/random"],
+});
+
+const StyledContainer = styled.div`
+  padding: 0 2vw;
 `;
 
-const StyledRow = styled(Row)`
-  height: calc(100vh - 85px);
+const StyledCol = styled(Col)`
+  margin-bottom: 10px;
 `;
-
 const Services = () => {
   return (
     <div>
       <Header position={"relative"} />
 
-      <StyledRow>
-        <Col span={8}>
-          {times(5, () => service()).map((service, index) => (
-            <Service service={service} key={index} />
+      <StyledContainer>
+        <Tabs>
+          {healthCareProviders.map((provider) => (
+            <Tabs.TabPane key={provider.value} tab={provider.label}>
+              <Row justify={"space-around"} gutter={1}>
+                {times(25, () => service()).map((service, index) => (
+                  <StyledCol span={5} key={index}>
+                    <Card
+                      cover={<img src={service.images[0]} alt="" />}
+                      hoverable
+                    >
+                      <Card.Meta
+                        title={service.title}
+                        description={service.description}
+                      />
+                    </Card>
+                  </StyledCol>
+                ))}
+              </Row>
+            </Tabs.TabPane>
           ))}
-        </Col>
-        <StyledMapContainer span={16}>
-          <Map />
-        </StyledMapContainer>
-      </StyledRow>
+        </Tabs>
+      </StyledContainer>
     </div>
   );
 };

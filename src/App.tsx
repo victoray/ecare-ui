@@ -13,6 +13,7 @@ import {
   hideSignUpModal,
   selectShowLogin,
   selectShowSignUp,
+  setToken,
 } from "./store/auth";
 import { Button, Form, Input, message, Modal, Typography } from "antd";
 import { useMutation } from "react-query";
@@ -115,18 +116,19 @@ const LoginModal: FC<{ visible: boolean }> = ({ visible }) => {
 };
 
 function App() {
+  const dispatch = useDispatch();
   const showSignUpModal = useSelector(selectShowSignUp);
   const showLoginModal = useSelector(selectShowLogin);
 
   const auth = getAuth();
   onAuthStateChanged(auth, (user) => {
     if (user) {
-      const uid = user.uid;
-      console.log(uid);
+      user.getIdToken().then((token) => {
+        dispatch(setToken(token));
+      });
       // ...
     } else {
-      // User is signed out
-      // ...
+      dispatch(setToken(""));
     }
   });
 

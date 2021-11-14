@@ -1,10 +1,10 @@
+/* eslint-disable react/style-prop-object */
 import React from "react";
-import ReactMapboxGl, { MapContext } from "react-mapbox-gl";
+import ReactMapboxGl, {MapContext} from "react-mapbox-gl";
 import ZoomControl from "./ZoomControl";
 
 const Mapbox = ReactMapboxGl({
-  accessToken:
-    "pk.eyJ1IjoidmlrdG9yYXkiLCJhIjoiY2tnNnJ5cjloMDBkODJwbjQ1YWFlemtzZyJ9._s3-KMEJMsGmiABI1m3mMw",
+  accessToken: process.env.REACT_APP_MAPBOX_ACCESS_TOKEN || "",
 });
 
 const Map = () => {

@@ -14,6 +14,7 @@ import {
 } from "antd";
 import { MenuOutlined, SearchOutlined, UserOutlined } from "@ant-design/icons";
 import { healthCareProviders } from "../../constants";
+import Search from "./Search";
 
 const { RangePicker } = DatePicker;
 
@@ -96,7 +97,7 @@ const Header: FC<HeaderProps> = ({ position }) => {
       <StyledText>eCare</StyledText>
 
       <StyledInputGroup>
-        <StyledInput placeholder={"Where do you want this service?"} />
+        <StyledInput as={Search} />
         <Divider type="vertical" />
         <StyledInput
           as={Select}

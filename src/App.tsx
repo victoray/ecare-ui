@@ -1,5 +1,6 @@
 import React, { FC } from "react";
 import "./App.less";
+import "./firebaseConfig";
 import Landing from "./views/Landing";
 import Search from "./views/Search";
 
@@ -13,7 +14,14 @@ import {
   selectShowLogin,
   selectShowSignUp,
 } from "./store/auth";
-import { Button, Form, Input, Modal, Typography } from "antd";
+import { Button, Form, Input, message, Modal, Typography } from "antd";
+import { useMutation } from "react-query";
+import {
+  createUserWithEmailAndPassword,
+  getAuth,
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+} from "firebase/auth";
 
 enum Routes {
   Landing = "/",
@@ -23,6 +31,21 @@ enum Routes {
 
 const SignUpModal: FC<{ visible: boolean }> = ({ visible }) => {
   const dispatch = useDispatch();
+  const { mutate: signUp, isLoading } = useMutation(
+    ([email, password]: [string, string]) => {
+      const auth = getAuth();
+
+      return createUserWithEmailAndPassword(auth, email, password);
+    },
+    {
+      onSuccess: () => {
+        dispatch(hideSignUpModal());
+      },
+      onError: (error: any) => {
+        message.error(error?.message || "Sign up failed");
+      },
+    }
+  );
   return (
     <Modal
       visible={visible}
@@ -31,15 +54,15 @@ const SignUpModal: FC<{ visible: boolean }> = ({ visible }) => {
       footer={null}
     >
       <Typography.Title level={3}> Sign Up</Typography.Title>
-      <Form>
+      <Form onFinish={(values) => signUp([values.email, values.password])}>
         <Form.Item name={"email"}>
-          <Input type={"email"} placeholder={"Email Address"} />
+          <Input type={"email"} placeholder={"Email Address"} required />
         </Form.Item>
-        <Form.Item name={"Password"}>
-          <Input.Password placeholder={"Password"} />
+        <Form.Item name={"password"}>
+          <Input.Password placeholder={"Password"} required />
         </Form.Item>
 
-        <Button type={"primary"} block htmlType={"submit"}>
+        <Button type={"primary"} block htmlType={"submit"} loading={isLoading}>
           Sign Up
         </Button>
       </Form>
@@ -50,6 +73,22 @@ const SignUpModal: FC<{ visible: boolean }> = ({ visible }) => {
 const LoginModal: FC<{ visible: boolean }> = ({ visible }) => {
   const dispatch = useDispatch();
 
+  const { mutate: signIn, isLoading } = useMutation(
+    ([email, password]: [string, string]) => {
+      const auth = getAuth();
+
+      return signInWithEmailAndPassword(auth, email, password);
+    },
+    {
+      onSuccess: () => {
+        dispatch(hideLoginModal());
+      },
+      onError: (error: any) => {
+        message.error(error?.message || "Login failed");
+      },
+    }
+  );
+
   return (
     <Modal
       visible={visible}
@@ -59,16 +98,18 @@ const LoginModal: FC<{ visible: boolean }> = ({ visible }) => {
     >
       <Typography.Title level={3}>Login</Typography.Title>
 
-      <Form.Item name={"email"}>
-        <Input type={"email"} placeholder={"Email Address"} />
-      </Form.Item>
-      <Form.Item name={"Password"}>
-        <Input.Password placeholder={"Password"} />
-      </Form.Item>
+      <Form onFinish={(values) => signIn([values.email, values.password])}>
+        <Form.Item name={"email"}>
+          <Input type={"email"} placeholder={"Email Address"} required />
+        </Form.Item>
+        <Form.Item name={"password"}>
+          <Input.Password placeholder={"Password"} required />
+        </Form.Item>
 
-      <Button type={"primary"} block htmlType={"submit"}>
-        Login
-      </Button>
+        <Button type={"primary"} block htmlType={"submit"} loading={isLoading}>
+          Login
+        </Button>
+      </Form>
     </Modal>
   );
 };
@@ -76,6 +117,18 @@ const LoginModal: FC<{ visible: boolean }> = ({ visible }) => {
 function App() {
   const showSignUpModal = useSelector(selectShowSignUp);
   const showLoginModal = useSelector(selectShowLogin);
+
+  const auth = getAuth();
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      const uid = user.uid;
+      console.log(uid);
+      // ...
+    } else {
+      // User is signed out
+      // ...
+    }
+  });
 
   return (
     <div className="App">

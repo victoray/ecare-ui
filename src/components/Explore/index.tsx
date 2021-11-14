@@ -48,7 +48,7 @@ const Explore = () => {
           location: faker.address.cityName(),
           avatar: "https://joeschmoe.io/api/v1/random",
         })).map((data, index) => (
-          <Col span={6}>
+          <Col span={6} key={index}>
             <CareProvider {...data} key={index} />
           </Col>
         ))}

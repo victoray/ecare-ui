@@ -64,8 +64,12 @@ const Header: FC<HeaderProps> = ({ position }) => {
   const dispatch = useDispatch();
   const menu = (
     <Menu>
-      <Menu.Item onClick={() => dispatch(showSignUpModal())}>Sign up</Menu.Item>
-      <Menu.Item onClick={() => dispatch(showLoginModal())}>Login</Menu.Item>
+      <Menu.Item onClick={() => dispatch(showSignUpModal())} key={"signUp"}>
+        Sign up
+      </Menu.Item>
+      <Menu.Item onClick={() => dispatch(showLoginModal())} key={"login"}>
+        Login
+      </Menu.Item>
     </Menu>
   );
 

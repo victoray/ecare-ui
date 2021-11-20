@@ -106,7 +106,7 @@ const Header: FC<HeaderProps> = ({
             </Fragment>
           )}
 
-          <Menu.Item onClick={() => history.push("/account")} key={"account"}>
+          <Menu.Item onClick={() => history.push("/inbox")} key={"inbox"}>
             Inbox
           </Menu.Item>
           <Divider />

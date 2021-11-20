@@ -1,4 +1,4 @@
-import React, { FC } from "react";
+import React, { FC, useEffect } from "react";
 import "./App.less";
 import "./firebaseConfig";
 import Landing from "./views/Landing";
@@ -30,6 +30,7 @@ import Account from "./views/Account";
 import { useHistory } from "react-router";
 import Calendar from "./views/Calendar";
 import ServiceDetail from "./views/ServiceDetail";
+import Inbox from "./views/Inbox";
 
 enum Routes {
   Landing = "/",
@@ -38,6 +39,7 @@ enum Routes {
   Service = "/service/:serviceId",
   Account = "/account",
   Calendar = "/calendar",
+  Inbox = "/inbox",
 }
 
 const SignUpModal: FC<{ visible: boolean }> = ({ visible }) => {
@@ -175,26 +177,28 @@ function App() {
   const showSignUpModal = useSelector(selectShowSignUp);
   const showLoginModal = useSelector(selectShowLogin);
 
-  const auth = getAuth();
-  onAuthStateChanged(auth, (user) => {
-    if (user) {
-      user.getIdToken().then((token) => {
-        dispatch(setToken(token));
+  useEffect(() => {
+    const auth = getAuth();
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        user.getIdToken().then((token) => {
+          dispatch(setToken(token));
 
-        const api = new Api(token);
+          const api = new Api(token);
 
-        api.client.get<string, User>(`/users/${user.uid}/`).then((user) => {
-          dispatch(setUser(user));
-          if (!user.role && !window.location.href.includes(Routes.Account)) {
-            window.location.assign(Routes.Account);
-          }
+          api.client.get<string, User>(`/users/${user.uid}/`).then((user) => {
+            dispatch(setUser(user));
+            if (!user.role && !window.location.href.includes(Routes.Account)) {
+              window.location.assign(Routes.Account);
+            }
+          });
         });
-      });
-      // ...
-    } else {
-      dispatch(setToken(""));
-    }
-  });
+        // ...
+      } else {
+        dispatch(setToken(""));
+      }
+    });
+  }, [dispatch]);
 
   return (
     <div className="App">
@@ -207,6 +211,7 @@ function App() {
           <Route path={Routes.Search} component={Search} />
           <Route path={Routes.Service} component={ServiceDetail} />
           <Route path={Routes.Services} component={Services} />
+          <Route path={Routes.Inbox} component={Inbox} />
           <Route path={Routes.Landing} component={Landing} />
         </Switch>
 

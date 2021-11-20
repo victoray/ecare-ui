@@ -28,7 +28,7 @@ const Services = () => {
   const api = useApi();
   const user = useSelector(selectUser);
 
-  const { data: services } = useQuery("services", () =>
+  const { data: services } = useQuery(["services", api], () =>
     api.client.get<any, Array<ServiceType>>("/services/", {
       params: { user: user?.uuid },
     })

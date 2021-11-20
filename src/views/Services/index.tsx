@@ -1,10 +1,13 @@
 import React from "react";
-import { Card, Col, Row, Tabs } from "antd";
+import { Card, Row, Typography } from "antd";
 import styled from "styled-components/macro";
 import faker from "faker";
-import { times } from "lodash";
-import { healthCareProviders } from "../../constants";
 import Header from "../../components/Header";
+import { useQuery } from "react-query";
+import { useApi } from "../../api";
+import Service, { ServiceType } from "components/Service";
+import { useSelector } from "react-redux";
+import { selectUser } from "../../store/auth";
 
 const service = () => ({
   title: faker.name.findName(),
@@ -14,39 +17,36 @@ const service = () => ({
 });
 
 const StyledContainer = styled.div`
-  padding: 0 2vw;
+  padding: 10px 10vw;
 `;
 
-const StyledCol = styled(Col)`
-  margin-bottom: 10px;
+const StyledCard = styled(Card)`
+  width: 100%;
 `;
+
 const Services = () => {
+  const api = useApi();
+  const user = useSelector(selectUser);
+
+  const { data: services } = useQuery("services", () =>
+    api.client.get<any, Array<ServiceType>>("/services/", {
+      params: { user: user?.uuid },
+    })
+  );
   return (
     <div>
       <Header position={"relative"} />
 
       <StyledContainer>
-        <Tabs>
-          {healthCareProviders.map((provider) => (
-            <Tabs.TabPane key={provider.value} tab={provider.label}>
-              <Row justify={"space-around"} gutter={1}>
-                {times(25, () => service()).map((service, index) => (
-                  <StyledCol span={5} key={index}>
-                    <Card
-                      cover={<img src={service.images[0]} alt="" />}
-                      hoverable
-                    >
-                      <Card.Meta
-                        title={service.title}
-                        description={service.description}
-                      />
-                    </Card>
-                  </StyledCol>
-                ))}
-              </Row>
-            </Tabs.TabPane>
+        <Typography.Title>Services</Typography.Title>
+
+        <Row justify={"space-around"} gutter={1}>
+          {services?.map((service) => (
+            <StyledCard key={service.url} hoverable>
+              <Service service={service} showDivider={false} />
+            </StyledCard>
           ))}
-        </Tabs>
+        </Row>
       </StyledContainer>
     </div>
   );

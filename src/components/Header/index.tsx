@@ -95,7 +95,7 @@ const Header: FC<HeaderProps> = ({
                 onClick={() => history.push("/services")}
                 key={"service"}
               >
-                My services
+                Services
               </Menu.Item>
               <Menu.Item
                 onClick={() => history.push("/calendar")}

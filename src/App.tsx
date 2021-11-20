@@ -29,11 +29,13 @@ import { Api } from "./api";
 import Account from "./views/Account";
 import { useHistory } from "react-router";
 import Calendar from "./views/Calendar";
+import ServiceDetail from "./views/ServiceDetail";
 
 enum Routes {
   Landing = "/",
   Search = "/search",
   Services = "/services",
+  Service = "/service/:serviceId",
   Account = "/account",
   Calendar = "/calendar",
 }
@@ -203,6 +205,7 @@ function App() {
           <Route path={Routes.Account} component={Account} />
           <Route path={Routes.Calendar} component={Calendar} />
           <Route path={Routes.Search} component={Search} />
+          <Route path={Routes.Service} component={ServiceDetail} />
           <Route path={Routes.Services} component={Services} />
           <Route path={Routes.Landing} component={Landing} />
         </Switch>

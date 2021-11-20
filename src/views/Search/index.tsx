@@ -5,7 +5,7 @@ import styled from "styled-components/macro";
 import { times } from "lodash";
 import "mapbox-gl/dist/mapbox-gl.css";
 import Map from "./Map";
-import Service, { service } from "./Service";
+import Service, { service } from "../../components/Service";
 
 const StyledMapContainer = styled(Col)`
   background-color: gray;

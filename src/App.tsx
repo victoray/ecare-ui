@@ -5,7 +5,6 @@ import Landing from "./views/Landing";
 import Services from "./views/Services";
 
 import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
-import Footer from "./components/Footer";
 import Search from "./views/Search";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -25,12 +24,15 @@ import {
   onAuthStateChanged,
   signInWithEmailAndPassword,
 } from "firebase/auth";
-import { Api } from "./api";
+import { Api, getMapboxPlaces } from "./api";
 import Account from "./views/Account";
 import { useHistory } from "react-router";
 import Calendar from "./views/Calendar";
 import ServiceDetail from "./views/ServiceDetail";
 import Inbox from "./views/Inbox";
+import { head } from "lodash";
+import { MapBoxFeature, setCareProvider, setFeature } from "./store/search";
+import Footer from "./components/Footer";
 
 enum Routes {
   Landing = "/",
@@ -41,6 +43,30 @@ enum Routes {
   Calendar = "/calendar",
   Inbox = "/inbox",
 }
+
+const useInitializeSearch = () => {
+  const dispatch = useDispatch();
+  const { mutate: searchMapboxPlaces } = useMutation(getMapboxPlaces, {
+    onSuccess(response) {
+      const feature: MapBoxFeature | undefined = head(response.data.features);
+      if (feature) {
+        dispatch(setFeature(feature));
+      }
+    },
+  });
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const place = params.get("feature");
+    const provider = params.get("provider");
+    if (place) {
+      searchMapboxPlaces(place);
+    }
+    if (provider) {
+      dispatch(setCareProvider(provider));
+    }
+  }, [dispatch, searchMapboxPlaces]);
+};
 
 const SignUpModal: FC<{ visible: boolean }> = ({ visible }) => {
   const dispatch = useDispatch();
@@ -173,6 +199,7 @@ const LoginModal: FC<{ visible: boolean }> = ({ visible }) => {
 };
 
 function App() {
+  useInitializeSearch();
   const dispatch = useDispatch();
   const showSignUpModal = useSelector(selectShowSignUp);
   const showLoginModal = useSelector(selectShowLogin);

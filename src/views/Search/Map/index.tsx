@@ -1,13 +1,15 @@
 /* eslint-disable react/style-prop-object */
-import React from "react";
+import React, {FC} from "react";
 import ReactMapboxGl, {MapContext} from "react-mapbox-gl";
 import ZoomControl from "./ZoomControl";
+import {ServiceType} from "../../../components/Service";
+import Cluster from "../../../components/Map/Cluster";
 
 const Mapbox = ReactMapboxGl({
   accessToken: process.env.REACT_APP_MAPBOX_ACCESS_TOKEN || "",
 });
 
-const Map = () => {
+const Map: FC<{ services: Array<ServiceType> }> = ({ services }) => {
   return (
     <Mapbox
       style="mapbox://styles/mapbox/streets-v9"
@@ -25,6 +27,8 @@ const Map = () => {
           </>
         )}
       </MapContext.Consumer>
+
+      <Cluster services={services} />
     </Mapbox>
   );
 };

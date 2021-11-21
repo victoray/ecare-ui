@@ -1,7 +1,7 @@
 import React, { FC, Fragment, useState } from "react";
 import { useMutation } from "react-query";
 import { getMapboxPlaces } from "api";
-import { BluePinIcon } from "./CustomIcons";
+import { BluePinIcon } from "../CustomIcons";
 import styled from "styled-components";
 import { AutoComplete, Input, Space } from "antd";
 import { MapBoxFeature } from "./Search";
@@ -35,6 +35,7 @@ type SearchProps = {
   defaultValue?: string;
   onClear?(): void;
   handleChange?(value: string): void;
+  value?: string;
 };
 
 const MapboxSearch: FC<SearchProps> = ({
@@ -47,6 +48,7 @@ const MapboxSearch: FC<SearchProps> = ({
   onClear,
   handleChange,
   defaultValue,
+  value,
 }) => {
   const [suggestions, setSuggestions] = useState<Array<MapBoxFeature>>([]);
 
@@ -76,6 +78,7 @@ const MapboxSearch: FC<SearchProps> = ({
     <Fragment>
       <StyledAutoComplete
         options={options}
+        value={value}
         disabled={disabled}
         onSearch={(value) => String(value).trim() && searchMapboxPlaces(value)}
         onSelect={(_, option) => onSelect?.(option.feature)}

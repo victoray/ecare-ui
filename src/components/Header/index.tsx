@@ -37,6 +37,7 @@ const StyledContainer = styled.div<{ position?: string }>`
   position: ${(props) => props.position || "fixed"};
   top: 0;
   width: 100vw;
+  max-width: 100vw;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -99,13 +100,13 @@ const ServiceSearch = () => {
     <StyledInputGroup>
       <StyledInput
         as={MapboxSearch}
-        defaultValue={searchParams.feature?.place_name}
+        value={searchParams.feature?.place_name}
         onSelect={(feature: MapBoxFeature) => dispatch(setFeature(feature))}
       />
       <Divider type="vertical" />
       <StyledInput
         as={Select}
-        defaultValue={searchParams.careProvider}
+        value={searchParams.careProvider}
         options={healthCareProviders}
         placeholder={"Health care provider"}
         onChange={(value: any) => dispatch(setCareProvider(value))}

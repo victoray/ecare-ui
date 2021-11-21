@@ -67,6 +67,13 @@ const StyledPriceInfo = styled(Row)`
   margin-top: auto;
 `;
 
+type Address = {
+  rawAddress: number;
+  longitude: number;
+  latitude: number;
+  uuid: string;
+};
+
 export type ServiceType = {
   fullDescription: string;
   images: Array<string>;
@@ -77,6 +84,7 @@ export type ServiceType = {
   url: string;
   user: User;
   uuid: string;
+  addresses?: Array<Address>;
 };
 
 type ServiceProps = {
@@ -99,9 +107,9 @@ const Service: FC<ServiceProps> = ({ service, showDivider = true }) => {
             <Typography.Text strong>
               <Link to={`/service/${service.uuid}`}>{service.name}</Link>
             </Typography.Text>
-            <Typography.Text type={"secondary"}>
+            <Typography.Paragraph type={"secondary"} ellipsis={{ rows: 5 }}>
               {service.fullDescription}
-            </Typography.Text>
+            </Typography.Paragraph>
           </StyledSpace>
 
           <StyledPriceInfo justify={"end"}>

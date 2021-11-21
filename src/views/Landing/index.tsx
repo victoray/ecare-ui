@@ -7,7 +7,7 @@ import Explore from "components/Explore";
 const StyledContainer = styled.div``;
 
 const StyledHeaderImage = styled.div`
-  width: 100vw;
+  //width: 100vw;
   height: 75vh;
   object-fit: cover;
 

@@ -2846,6 +2846,11 @@
     "@typescript-eslint/types" "4.15.2"
     eslint-visitor-keys "^2.0.0"
 
+"@videosdk.live/rtc-js-prebuilt@^0.1.16":
+  version "0.1.16"
+  resolved "https://registry.yarnpkg.com/@videosdk.live/rtc-js-prebuilt/-/rtc-js-prebuilt-0.1.16.tgz#1ed405cde36b659ac9fe1893d31c8e6a4641793f"
+  integrity sha512-6ENDi5sEzRFkcY6oYzUWmhdO3mXotf7g7A5o6YYlsSoK56EKVMpBfs4OiJXLz5ZGYR8eElLjC+db0kyoUvv03w==
+
 "@webassemblyjs/ast@1.9.0":
   version "1.9.0"
   resolved "https://registry.yarnpkg.com/@webassemblyjs/ast/-/ast-1.9.0.tgz#bd850604b4042459a5a41cd7d338cbed695ed964"

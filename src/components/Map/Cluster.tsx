@@ -94,7 +94,6 @@ const clusterMarker = (
 
 const Cluster: FC<{ services: Array<ServiceType> }> = ({ services }) => {
   const addresses = services.map((service) => service.addresses);
-  console.log(addresses);
   return (
     <Fragment>
       <MapboxCluster

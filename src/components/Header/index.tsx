@@ -11,8 +11,6 @@ import {
   Typography,
 } from "antd";
 import { MenuOutlined, SearchOutlined, UserOutlined } from "@ant-design/icons";
-import { healthCareProviders } from "../../constants";
-import Search from "./Search";
 import { useDispatch, useSelector } from "react-redux";
 import {
   selectIsProvider,
@@ -25,6 +23,14 @@ import { useMutation } from "react-query";
 import { getAuth, signOut } from "firebase/auth";
 import { useHistory } from "react-router";
 import { Link } from "react-router-dom";
+import { healthCareProviders } from "../../constants";
+import {
+  selectSearchParams,
+  setCareProvider,
+  setFeature,
+} from "../../store/search";
+import MapboxSearch from "./MapBoxSearch";
+import { MapBoxFeature } from "./Search";
 
 const StyledContainer = styled.div<{ position?: string }>`
   padding: 10px 60px;
@@ -67,6 +73,55 @@ type HeaderProps = {
   position?: "relative" | "absolute" | "fixed";
   showSearch?: boolean;
   textColor?: string;
+};
+
+const ServiceSearch = () => {
+  const history = useHistory();
+  const dispatch = useDispatch();
+  const searchParams = useSelector(selectSearchParams);
+
+  const onSearch = () => {
+    const url = new URLSearchParams();
+    const { feature, careProvider } = searchParams;
+
+    if (feature) {
+      url.set("feature", feature.place_name);
+    }
+
+    if (careProvider) {
+      url.set("provider", careProvider);
+    }
+
+    history.push(`/search/?${url.toString()}`);
+  };
+
+  return (
+    <StyledInputGroup>
+      <StyledInput
+        as={MapboxSearch}
+        defaultValue={searchParams.feature?.place_name}
+        onSelect={(feature: MapBoxFeature) => dispatch(setFeature(feature))}
+      />
+      <Divider type="vertical" />
+      <StyledInput
+        as={Select}
+        defaultValue={searchParams.careProvider}
+        options={healthCareProviders}
+        placeholder={"Health care provider"}
+        onChange={(value: any) => dispatch(setCareProvider(value))}
+        allowClear
+      />
+      <Divider type="vertical" />
+
+      <StyledButton
+        icon={<SearchOutlined />}
+        type={"primary"}
+        onClick={onSearch}
+      >
+        Search
+      </StyledButton>
+    </StyledInputGroup>
+  );
 };
 
 const Header: FC<HeaderProps> = ({
@@ -136,22 +191,7 @@ const Header: FC<HeaderProps> = ({
         <StyledText textColor={textColor}>eCare</StyledText>
       </Link>
 
-      {showSearch && (
-        <StyledInputGroup>
-          <StyledInput as={Search} />
-          <Divider type="vertical" />
-          <StyledInput
-            as={Select}
-            options={healthCareProviders}
-            placeholder={"Health care provider"}
-          />
-          <Divider type="vertical" />
-
-          <StyledButton icon={<SearchOutlined />} type={"primary"}>
-            Search
-          </StyledButton>
-        </StyledInputGroup>
-      )}
+      {showSearch && <ServiceSearch />}
 
       <Dropdown overlay={menu} overlayStyle={{ width: 250 }}>
         <StyledButton icon={<MenuOutlined />} size={"large"}>

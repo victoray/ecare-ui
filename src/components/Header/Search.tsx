@@ -90,7 +90,9 @@ const Search: FC = () => {
     <MapboxSearch
       onSearchComplete={(features) => dispatch(suggest(features))}
       onDropdownVisibleChange={(opened) => dispatch(open(opened))}
-      onSelect={(featureId) => dispatch(selectFeature(suggestions[featureId]))}
+      onSelect={(featureId) =>
+        dispatch(selectFeature(suggestions[featureId.id]))
+      }
       onMouseEnter={(featureId) => dispatch(highlight(featureId))}
       onMouseLeave={() => dispatch(highlight(null))}
     />

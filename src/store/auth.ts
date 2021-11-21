@@ -1,5 +1,5 @@
 import { createAction, createReducer } from "@reduxjs/toolkit";
-import type { RootState } from "./index";
+import type { RootState } from ".";
 
 export type User = {
   uuid: string;

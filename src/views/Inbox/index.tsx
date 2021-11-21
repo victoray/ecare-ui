@@ -46,7 +46,9 @@ const InboxView = () => {
   const api = useApi();
   const user = useSelector(selectUser);
   const isPatient = user?.roleType === "patient";
-  const [userToAppointment, setUserToAppointment] = useState<Record<string, string>>({});
+  const [userToAppointment, setUserToAppointment] = useState<
+    Record<string, string>
+  >({});
   const [otherUser, setOtherUser] = useState<null | Talk.UserData>(null);
 
   const params = useMemo(() => {
@@ -60,29 +62,29 @@ const InboxView = () => {
     return params;
   }, [user]);
 
-  const {data: appointments} = useQuery(
-      ["appointments", api, params],
-      () =>
-          api.client.get<any, Array<Appointment>>("/appointments/", {
-            params,
-          }),
-      {
-        enabled: Boolean(user),
-        onSuccess(response) {
-          const mapping: Record<string, string> = {};
-          response.forEach((appointment) => {
-            mapping[appointment.patient.uuid] = appointment.uuid;
-            mapping[appointment.careProvider.uuid] = appointment.uuid;
-          });
-          setUserToAppointment(mapping);
-        },
-      }
+  const { data: appointments } = useQuery(
+    ["appointments", api, params],
+    () =>
+      api.client.get<any, Array<Appointment>>("/appointments/", {
+        params,
+      }),
+    {
+      enabled: Boolean(user),
+      onSuccess(response) {
+        const mapping: Record<string, string> = {};
+        response.forEach((appointment) => {
+          mapping[appointment.patient.uuid] = appointment.uuid;
+          mapping[appointment.careProvider.uuid] = appointment.uuid;
+        });
+        setUserToAppointment(mapping);
+      },
+    }
   );
 
   const container = useRef<HTMLDivElement>();
   const inbox = useRef<Inbox>();
 
-  const handleVideoCall = async (appointmentId: string) => {
+  const startVideoCall = async (appointmentId: string) => {
     const w: any = window;
 
     const callFrame = w.DailyIframe.createFrame({
@@ -111,7 +113,7 @@ const InboxView = () => {
 
     callFrame.join({
       url,
-      userName: user?.legalName
+      userName: user?.legalName,
     });
 
     callFrame.on("left-meeting", () => callFrame.destroy());
@@ -121,111 +123,111 @@ const InboxView = () => {
     if (container.current && appointments && user) {
       const windowInstance: any = window;
       Talk.ready
-          .then(() => {
-            const me = new Talk.User({
-              id: user.uuid,
-              name: user.legalName || "",
-              email: user.email,
+        .then(() => {
+          const me = new Talk.User({
+            id: user.uuid,
+            name: user.legalName || "",
+            email: user.email,
+            role: "default",
+            photoUrl:
+              user.profileImage || 'https://joeschmoe.io/api/v1/random"',
+          });
+
+          if (!windowInstance.talkSession) {
+            windowInstance.talkSession = new Talk.Session({
+              appId: "t6o0sxAD",
+              me: me,
+            });
+          }
+
+          const conversations = appointments.map((appointment) => {
+            const otherUser = isPatient
+              ? appointment.careProvider
+              : appointment.patient;
+
+            const other = new Talk.User({
+              id: otherUser.uuid,
+              name: otherUser.legalName || "",
+              email: otherUser.email,
               role: "default",
               photoUrl:
-                  user.profileImage || 'https://joeschmoe.io/api/v1/random"',
+                otherUser.profileImage || 'https://joeschmoe.io/api/v1/random"',
             });
 
-            if (!windowInstance.talkSession) {
-              windowInstance.talkSession = new Talk.Session({
-                appId: "t6o0sxAD",
-                me: me,
-              });
-            }
+            const conversationId = Talk.oneOnOneId(me, other);
 
-            const conversations = appointments.map((appointment) => {
-              const otherUser = isPatient
-                  ? appointment.careProvider
-                  : appointment.patient;
+            const conversation =
+              windowInstance.talkSession.getOrCreateConversation(
+                conversationId
+              );
+            conversation.setParticipant(me);
+            conversation.setParticipant(other);
 
-              const other = new Talk.User({
-                id: otherUser.uuid,
-                name: otherUser.legalName || "",
-                email: otherUser.email,
-                role: "default",
-                photoUrl:
-                    otherUser.profileImage || 'https://joeschmoe.io/api/v1/random"',
-              });
+            return conversation;
+          });
 
-              const conversationId = Talk.oneOnOneId(me, other);
+          inbox.current = windowInstance.talkSession.createInbox({
+            selected: conversations[0],
+            showChatHeader: false,
+            showFeedHeader: false,
+            showMobileBackButton: false,
+          });
+          inbox.current?.mount(document.getElementById("talkjs-container"));
 
-              const conversation =
-                  windowInstance.talkSession.getOrCreateConversation(
-                      conversationId
-                  );
-              conversation.setParticipant(me);
-              conversation.setParticipant(other);
-
-              return conversation;
-            });
-
-            inbox.current = windowInstance.talkSession.createInbox({
-              selected: conversations[0],
-              showChatHeader: false,
-              showFeedHeader: false,
-              showMobileBackButton: false,
-            });
-            inbox.current?.mount(document.getElementById("talkjs-container"));
-
-            inbox.current?.on("conversationSelected", function ({others}) {
-              const other = others?.[0];
-              setOtherUser(other || null);
-            });
-          })
-          .catch((e) => console.error(e));
+          inbox.current?.on("conversationSelected", function ({ others }) {
+            const other = others?.[0];
+            setOtherUser(other || null);
+          });
+        })
+        .catch((e) => console.error(e));
     }
   }, [appointments, isPatient, user]);
 
   return (
-      <div>
-        <Header showSearch={false} position={"relative"}/>
+    <div>
+      <Header showSearch={false} position={"relative"} />
 
-        <StyledChatHeader>
-          <StyledTitle>
-            <Typography.Title level={3}>Chats</Typography.Title>
-          </StyledTitle>
-          {otherUser && (
-              <StyledChatControls>
-                <Space align={"center"}>
-                  <Avatar
-                      size={36}
-                      src={
-                        otherUser?.photoUrl || "https://joeschmoe.io/api/v1/random"
-                      }
-                      icon={<UserOutlined/>}
-                  />
-                  <Typography.Text strong>{otherUser?.name}</Typography.Text>
-                </Space>
-
-                <Space>
-                  <Button
-                      icon={<VideoCameraOutlined/>}
-                      type={"link"}
-                      onClick={() =>
-                          user && handleVideoCall(userToAppointment[otherUser.id])
-                      }
-                  />
-                </Space>
-              </StyledChatControls>
-          )}
-        </StyledChatHeader>
-
-        <div className="chatbox-container">
-          <StyledInbox
-              id={"talkjs-container"}
-              ref={(node) => {
-                if (node) {
-                  container.current = node;
+      <StyledChatHeader>
+        <StyledTitle>
+          <Typography.Title level={3}>Chats</Typography.Title>
+        </StyledTitle>
+        {otherUser && (
+          <StyledChatControls>
+            <Space align={"center"}>
+              <Avatar
+                size={36}
+                src={
+                  otherUser?.photoUrl || "https://joeschmoe.io/api/v1/random"
                 }
-              }}
-          />
-        </div>
+                icon={<UserOutlined />}
+              />
+              <Typography.Text strong>{otherUser?.name}</Typography.Text>
+            </Space>
+
+            <Space>
+              <Button
+                icon={<VideoCameraOutlined />}
+                type={"link"}
+                onClick={() =>
+                  user && startVideoCall(userToAppointment[otherUser.id])
+                }
+              />
+            </Space>
+          </StyledChatControls>
+        )}
+      </StyledChatHeader>
+
+      <div className="chatbox-container">
+        <StyledInbox
+          id={"talkjs-container"}
+          ref={(node) => {
+            if (node) {
+              container.current = node;
+            }
+          }}
+        />
       </div>
+    </div>
   );
 };
 

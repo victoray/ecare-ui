@@ -42,15 +42,22 @@ const StyledDatePicker = styled(DatePicker)`
 `;
 
 type ImageFieldProps = {
-  onChange(value: string): void;
+  onChange(value: Array<string>): void;
   editable?: boolean;
   imageRender?: ReactNode;
+  multiple?: boolean;
+  initialImages?: Array<string>;
 };
-const ImageField: FC<ImageFieldProps> = ({
-  onChange,
-  editable = true,
-  imageRender,
-}) => {
+export const ImageField: FC<ImageFieldProps> = ({
+                                                  onChange,
+                                                  editable = true,
+                                                  imageRender,
+                                                  multiple,
+                                                  initialImages = [],
+                                                }) => {
+  const [uploadedFiles, setUploadedFiles] =
+      useState<Array<string>>(initialImages);
+
   const uploadFileToCloudinary = (file: RcFile) => {
     const formData = new FormData();
     formData.append("file", file);
@@ -58,28 +65,38 @@ const ImageField: FC<ImageFieldProps> = ({
     formData.append("upload_preset", "a9arz1lk");
 
     return axios
-      .post("https://api.cloudinary.com/v1_1/odinson/image/upload", formData)
-      .then((response) => {
-        onChange(response.data.url);
-      });
+        .post("https://api.cloudinary.com/v1_1/odinson/image/upload", formData)
+        .then((response) => {
+          setUploadedFiles((state) => {
+            const image = response.data.url;
+
+            const images = [...state, image];
+
+            onChange(multiple ? images : [image])
+
+            return images
+          });
+        });
   };
 
   return (
-    <Space>
-      {imageRender}
-      {editable && (
-        <Upload
-          customRequest={({ onSuccess, onError, file, onProgress }) => {
-            uploadFileToCloudinary(file as RcFile)
-              .then(() => onSuccess?.("Ok"))
-              .catch(onError);
-          }}
-          showUploadList={false}
-        >
-          <Button icon={<UploadOutlined />}>Click to upload</Button>
-        </Upload>
-      )}
-    </Space>
+      <Space>
+        {imageRender}
+        {editable && (
+            <Upload
+                customRequest={({onSuccess, onError, file, onProgress}) => {
+                  uploadFileToCloudinary(file as RcFile)
+                      .then(() => onSuccess?.("Ok"))
+                      .catch(onError);
+                }}
+                accept={"image/*"}
+                showUploadList={false}
+                multiple={multiple}
+            >
+              <Button icon={<UploadOutlined/>}>Click to upload</Button>
+            </Upload>
+        )}
+      </Space>
   );
 };
 
@@ -106,123 +123,123 @@ const Account = () => {
     }
   }, [form, user]);
 
-  const { data: roles } = useQuery("roles", () =>
-    api.publicClient.get<string, Array<Role>>("/roles/")
+  const {data: roles} = useQuery("roles", () =>
+      api.publicClient.get<string, Array<Role>>("/roles/")
   );
 
-  const { mutateAsync: updateUser } = useMutation(
-    (data: Partial<User>) => {
-      const formattedData = { ...data };
-      if (formattedData.dateOfBirth) {
-        formattedData.dateOfBirth = moment(formattedData.dateOfBirth).format(
-          "YYYY-MM-DD"
-        );
-      }
-      return api.client.put<any, User>(`/users/${user?.uuid}/`, {
-        ...formattedData,
-      });
-    },
-    {
-      onSuccess: (user) => {
-        dispatch(setUser(user));
+  const {mutateAsync: updateUser} = useMutation(
+      (data: Partial<User>) => {
+        const formattedData = {...data};
+        if (formattedData.dateOfBirth) {
+          formattedData.dateOfBirth = moment(formattedData.dateOfBirth).format(
+              "YYYY-MM-DD"
+          );
+        }
+        return api.client.put<any, User>(`/users/${user?.uuid}/`, {
+          ...formattedData,
+        });
       },
-    }
+      {
+        onSuccess: (user) => {
+          dispatch(setUser(user));
+        },
+      }
   );
 
   return (
-    <div>
-      <Header position={"relative"} showSearch={false} textColor={"#40a9ff"} />
+      <div>
+        <Header position={"relative"} showSearch={false} textColor={"#40a9ff"}/>
 
-      <StyledContent>
-        <Typography.Title>Account Info</Typography.Title>
-        <Typography.Text type={"secondary"}>
-          This information will be used to verify your account
-        </Typography.Text>
-        <Divider />
+        <StyledContent>
+          <Typography.Title>Account Info</Typography.Title>
+          <Typography.Text type={"secondary"}>
+            This information will be used to verify your account
+          </Typography.Text>
+          <Divider/>
 
-        <Form form={form} layout={"vertical"} onFinish={updateUser}>
-          <Form.Item
-            name={"profileImage"}
-            label={<strong>Profile Image</strong>}
-          >
-            <ImageField
-              onChange={(value) => {
-                form.setFieldsValue({ profileImage: value });
-                setProfileImage(value);
-              }}
-              imageRender={
-                profileImage && (
-                  <Avatar
-                    size={96}
-                    icon={<UserOutlined />}
-                    src={profileImage}
-                  />
-                )
-              }
-            />
-          </Form.Item>
-          <Form.Item name={"legalName"} label={<strong>Name</strong>}>
-            <Input />
-          </Form.Item>
+          <Form form={form} layout={"vertical"} onFinish={updateUser}>
+            <Form.Item
+                name={"profileImage"}
+                label={<strong>Profile Image</strong>}
+            >
+              <ImageField
+                  onChange={(value) => {
+                    form.setFieldsValue({profileImage: value});
+                    setProfileImage(value[0]);
+                  }}
+                  imageRender={
+                    profileImage && (
+                        <Avatar
+                            size={96}
+                            icon={<UserOutlined/>}
+                            src={profileImage}
+                        />
+                    )
+                  }
+              />
+            </Form.Item>
+            <Form.Item name={"legalName"} label={<strong>Name</strong>}>
+              <Input/>
+            </Form.Item>
 
-          <Form.Item
-            name={"dateOfBirth"}
-            label={<strong>Date of birth</strong>}
-          >
-            <StyledDatePicker
-              disabled={Boolean(user?.dateOfBirth)}
-              format={"YYYY-MM-DD"}
-            />
-          </Form.Item>
+            <Form.Item
+                name={"dateOfBirth"}
+                label={<strong>Date of birth</strong>}
+            >
+              <StyledDatePicker
+                  disabled={Boolean(user?.dateOfBirth)}
+                  format={"YYYY-MM-DD"}
+              />
+            </Form.Item>
 
-          <Form.Item name={"email"} label={<strong>Email address</strong>}>
-            <Input disabled={true} />
-          </Form.Item>
+            <Form.Item name={"email"} label={<strong>Email address</strong>}>
+              <Input disabled={true}/>
+            </Form.Item>
 
-          <Form.Item
-            name={"governmentId"}
-            label={<strong>Government ID</strong>}
-          >
-            <ImageField
-              onChange={(value) => {
-                setGovernmentId(value);
-                form.setFieldsValue({ governmentId: value });
-              }}
-              imageRender={
-                governmentId && <Image width={300} src={governmentId} />
-              }
-            />
-          </Form.Item>
+            <Form.Item
+                name={"governmentId"}
+                label={<strong>Government ID</strong>}
+            >
+              <ImageField
+                  onChange={(value) => {
+                    setGovernmentId(value[0]);
+                    form.setFieldsValue({governmentId: value});
+                  }}
+                  imageRender={
+                    governmentId && <Image width={300} src={governmentId}/>
+                  }
+              />
+            </Form.Item>
 
-          <Form.Item
-            name={"emergencyContact"}
-            label={<strong>Emergency contact</strong>}
-          >
-            <Input type={"email"} />
-          </Form.Item>
+            <Form.Item
+                name={"emergencyContact"}
+                label={<strong>Emergency contact</strong>}
+            >
+              <Input type={"email"}/>
+            </Form.Item>
 
-          <Form.Item name={"address"} label={<strong>Address</strong>}>
-            <Input />
-          </Form.Item>
+            <Form.Item name={"address"} label={<strong>Address</strong>}>
+              <Input/>
+            </Form.Item>
 
-          <Form.Item name={"role"} label={<strong>Account type</strong>}>
-            <Select
-              disabled={Boolean(user?.role)}
-              options={roles?.map((role) => ({
-                value: role.url,
-                label: role.name,
-              }))}
-            />
-          </Form.Item>
+            <Form.Item name={"role"} label={<strong>Account type</strong>}>
+              <Select
+                  disabled={Boolean(user?.role)}
+                  options={roles?.map((role) => ({
+                    value: role.url,
+                    label: role.name,
+                  }))}
+              />
+            </Form.Item>
 
-          <Row justify={"end"}>
-            <Button type={"primary"} htmlType={"submit"}>
-              Update Account
-            </Button>
-          </Row>
-        </Form>
-      </StyledContent>
-    </div>
+            <Row justify={"end"}>
+              <Button type={"primary"} htmlType={"submit"}>
+                Update Account
+              </Button>
+            </Row>
+          </Form>
+        </StyledContent>
+      </div>
   );
 };
 

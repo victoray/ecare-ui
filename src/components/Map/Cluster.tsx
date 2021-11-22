@@ -106,7 +106,7 @@ const Cluster: FC<{ services: Array<ServiceType> }> = ({ services }) => {
           return (
             address && (
               <MapPin
-                coordinates={[address?.longitude, address?.latitude]}
+                coordinates={[address.longitude, address.latitude]}
                 key={address?.uuid}
               />
             )

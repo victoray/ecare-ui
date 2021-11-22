@@ -100,7 +100,7 @@ const ServiceSearch = () => {
     <StyledInputGroup>
       <StyledInput
         as={MapboxSearch}
-        value={searchParams.feature?.place_name}
+        defaultValue={searchParams.feature?.place_name}
         onSelect={(feature: MapBoxFeature) => dispatch(setFeature(feature))}
       />
       <Divider type="vertical" />

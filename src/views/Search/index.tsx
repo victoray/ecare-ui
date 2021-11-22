@@ -21,7 +21,7 @@ const StyledContainer = styled.div`
 `;
 
 const StyledServices = styled.div`
-  overflow-y: scroll;
+  overflow-y: auto;
   height: 100%;
   width: 35%;
   min-width: 300px;
@@ -31,8 +31,20 @@ const Search = () => {
   const api = useApi();
   const searchParams = useSelector(selectSearchParams);
 
-  const { data: services, isLoading } = useQuery(["services", api], () =>
-    api.client.get<any, Array<ServiceType>>(`/services/`)
+  const { data: services, isLoading } = useQuery(
+    ["services", api, searchParams],
+    () => {
+      const [latitude, longitude] =
+        searchParams.feature?.geometry.coordinates || [];
+
+      return api.publicClient.get<any, Array<ServiceType>>(`/services/`, {
+        params: {
+          longitude,
+          latitude,
+          providerType: searchParams.careProvider,
+        },
+      });
+    }
   );
 
   return (

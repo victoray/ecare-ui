@@ -58,7 +58,7 @@ const ServiceDetail: FC<ServiceDetailProps> = ({ match }) => {
 
   const { data: service, isLoading } = useQuery(
     [`service-${serviceId}`, api],
-    () => api.client.get<any, ServiceType>(`/services/${serviceId}/`)
+    () => api.publicClient.get<any, ServiceType>(`/services/${serviceId}/`)
   );
 
   const isOwner = user && user.uuid === service?.user.uuid;
@@ -130,31 +130,33 @@ const ServiceDetail: FC<ServiceDetailProps> = ({ match }) => {
                 </Typography.Paragraph>
               </Col>
 
-              <Col span={8}>
-                <Card hoverable>
-                  {isOwner ? (
-                    <Button
-                      type={"primary"}
-                      block
-                      size={"large"}
-                      onClick={() => history.push("/calendar")}
-                    >
-                      View appointments
-                    </Button>
-                  ) : (
-                    <Fragment>
-                      <Typography.Title level={4}>
-                        NGN {service?.pricePerHour} / hour
-                      </Typography.Title>
-                      <StyledDatePicker />
-                      <Divider />
-                      <Button type={"primary"} block size={"large"}>
-                        Book Appointment
+              {user && (
+                <Col span={8}>
+                  <Card hoverable>
+                    {isOwner ? (
+                      <Button
+                        type={"primary"}
+                        block
+                        size={"large"}
+                        onClick={() => history.push("/calendar")}
+                      >
+                        View appointments
                       </Button>
-                    </Fragment>
-                  )}
-                </Card>
-              </Col>
+                    ) : (
+                      <Fragment>
+                        <Typography.Title level={4}>
+                          NGN {service?.pricePerHour} / hour
+                        </Typography.Title>
+                        <StyledDatePicker />
+                        <Divider />
+                        <Button type={"primary"} block size={"large"}>
+                          Book Appointment
+                        </Button>
+                      </Fragment>
+                    )}
+                  </Card>
+                </Col>
+              )}
             </Row>
           </div>
         )}

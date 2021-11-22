@@ -67,11 +67,12 @@ const StyledPriceInfo = styled(Row)`
   margin-top: auto;
 `;
 
-type Address = {
-  rawAddress: number;
+export type Address = {
+  rawAddress: string;
   longitude: number;
   latitude: number;
   uuid: string;
+  service: string;
 };
 
 export type ServiceType = {

@@ -36,6 +36,7 @@ type SearchProps = {
   onClear?(): void;
   handleChange?(value: string): void;
   value?: string;
+  bordered?: boolean;
 };
 
 const MapboxSearch: FC<SearchProps> = ({
@@ -49,6 +50,7 @@ const MapboxSearch: FC<SearchProps> = ({
   handleChange,
   defaultValue,
   value,
+  bordered = false,
 }) => {
   const [suggestions, setSuggestions] = useState<Array<MapBoxFeature>>([]);
 
@@ -92,7 +94,7 @@ const MapboxSearch: FC<SearchProps> = ({
           onChange={(event) => handleChange?.(event.target.value)}
           placeholder="Type an address..."
           data-cy="map-search"
-          bordered={false}
+          bordered={bordered}
         />
       </StyledAutoComplete>
     </Fragment>

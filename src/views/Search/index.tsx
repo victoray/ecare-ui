@@ -24,7 +24,7 @@ const StyledServices = styled.div`
   overflow-y: auto;
   height: 100%;
   width: 35%;
-  min-width: 300px;
+  min-width: 600px;
 `;
 
 const Search = () => {

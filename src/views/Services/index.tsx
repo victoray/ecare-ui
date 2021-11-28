@@ -133,7 +133,7 @@ const Services = () => {
         </Row>
 
         <Drawer
-          visible={true}
+          visible={false}
           width={500}
           title={
             <Typography.Title level={3}>Create new service</Typography.Title>

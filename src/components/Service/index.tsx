@@ -97,7 +97,7 @@ const Service: FC<ServiceProps> = ({ service, showDivider = true }) => {
   return (
     <Fragment>
       <ServiceContainer align={"start"}>
-        <StyledServiceImage as={Carousel}>
+        <StyledServiceImage as={Carousel} autoplay>
           {service.images.map((image, index) => (
             <StyledServiceImage src={image} alt="" key={index} />
           ))}

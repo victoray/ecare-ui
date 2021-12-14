@@ -60,6 +60,8 @@ const Services = () => {
   const isProvider = useSelector(selectIsProvider);
   const history = useHistory();
 
+  const [drawerVisible, setDrawerVisible] = useState(false);
+
   const [images, setImages] = useState<Array<string>>([
     "https://res.cloudinary.com/odinson/image/upload/v1637538553/w6gvclvf84avgpm3hbay.jpg",
     "https://res.cloudinary.com/odinson/image/upload/v1637538553/wtbaegxcjmmpnqelu7yn.jpg",
@@ -69,17 +71,25 @@ const Services = () => {
   ]);
   const [form] = Form.useForm();
 
-  const { data: services } = useQuery(["services", api], () =>
+  const { data: services, refetch } = useQuery(["services", api], () =>
     api.client.get<any, Array<ServiceType>>("/services/", {
       params: { user: user?.uuid },
     })
   );
 
-  const { mutate: createService } = useMutation((data: any) => {
-    return api.client.post<any, ServiceType>("/services/", {
-      ...data,
-    });
-  });
+  const { mutate: createService, isLoading } = useMutation(
+    (data: any) => {
+      return api.client.post<any, ServiceType>("/services/", {
+        ...data,
+      });
+    },
+    {
+      onSuccess: () => {
+        setDrawerVisible(false);
+        refetch();
+      },
+    }
+  );
 
   const dummy = {
     name: "Care home",
@@ -113,10 +123,7 @@ const Services = () => {
 
         {isProvider && (
           <Row justify={"end"}>
-            <Button
-              type={"primary"}
-              onClick={() => history.push("/service/new")}
-            >
+            <Button type={"primary"} onClick={() => setDrawerVisible(true)}>
               Create Service
             </Button>
 
@@ -133,7 +140,7 @@ const Services = () => {
         </Row>
 
         <Drawer
-          visible={false}
+          visible={drawerVisible}
           width={500}
           title={
             <Typography.Title level={3}>Create new service</Typography.Title>
@@ -186,7 +193,7 @@ const Services = () => {
               <InputNumber min={0} required />
             </Form.Item>
 
-            <Button htmlType={"submit"} type={"primary"}>
+            <Button htmlType={"submit"} type={"primary"} loading={isLoading}>
               Submit
             </Button>
           </Form>

@@ -153,15 +153,12 @@ const Header: FC<HeaderProps> = ({
               >
                 Services
               </Menu.Item>
-              <Menu.Item
-                onClick={() => history.push("/calendar")}
-                key={"calendar"}
-              >
-                Calendar
-              </Menu.Item>
             </Fragment>
           )}
 
+          <Menu.Item onClick={() => history.push("/calendar")} key={"calendar"}>
+            Calendar
+          </Menu.Item>
           <Menu.Item onClick={() => history.push("/inbox")} key={"inbox"}>
             Inbox
           </Menu.Item>

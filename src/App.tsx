@@ -16,6 +16,7 @@ import {
   selectUser,
   setToken,
   setUser,
+  showLoginModal,
   User,
 } from "./store/auth";
 import { Button, Form, Input, message, Modal, Select, Typography } from "antd";
@@ -240,11 +241,22 @@ const Container = styled.div`
   min-height: calc(100vh - 75px);
 `;
 
+const PrivateRoute = ({ path, component }: any) => {
+  const dispatch = useDispatch();
+  const auth = getAuth();
+
+  if (!auth?.currentUser) {
+    dispatch(showLoginModal());
+  }
+  return <Route path={path} component={component} />;
+};
+
 function App() {
   useInitializeSearch();
   const dispatch = useDispatch();
   const showSignUpModal = useSelector(selectShowSignUp);
   const showLoginModal = useSelector(selectShowLogin);
+  const history = useHistory();
 
   useEffect(() => {
     const auth = getAuth();
@@ -257,6 +269,9 @@ function App() {
 
           api.client.get<string, User>(`/users/${user.uid}/`).then((user) => {
             dispatch(setUser(user));
+            if (user.roleType === "provider") {
+              history.push("services");
+            }
           });
         });
         // ...
@@ -264,7 +279,7 @@ function App() {
         dispatch(setToken(""));
       }
     });
-  }, [dispatch]);
+  }, [dispatch, history]);
 
   return (
     <div className="App">
@@ -273,12 +288,12 @@ function App() {
         <LoginModal visible={showLoginModal} />
         <Container>
           <Switch>
-            <Route path={Routes.Account} component={Account} />
-            <Route path={Routes.Calendar} component={Calendar} />
+            <PrivateRoute path={Routes.Account} component={Account} />
+            <PrivateRoute path={Routes.Calendar} component={Calendar} />
             <Route path={Routes.Search} component={Search} />
             <Route path={Routes.Service} component={ServiceDetail} />
             <Route path={Routes.Services} component={Services} />
-            <Route path={Routes.Inbox} component={Inbox} />
+            <PrivateRoute path={Routes.Inbox} component={Inbox} />
             <Route path={Routes.Landing} component={Landing} />
           </Switch>
         </Container>

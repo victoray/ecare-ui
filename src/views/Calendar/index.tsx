@@ -8,6 +8,7 @@ import { useQuery } from "react-query";
 import { useApi } from "../../api";
 import { useSelector } from "react-redux";
 import { selectUser, User } from "../../store/auth";
+import { useHistory } from "react-router";
 
 const StyledContent = styled.div`
   padding: 10px;
@@ -24,6 +25,7 @@ export type Appointment = {
 const Calendar = () => {
   const api = useApi();
   const user = useSelector(selectUser);
+  const history = useHistory();
   const isPatient = user?.roleType === "patient";
 
   const params = useMemo(() => {
@@ -63,7 +65,7 @@ const Calendar = () => {
             date: appointment.appointmentDate,
             id: appointment.uuid,
           }))}
-          eventClick={(event) => console.log(event.event)}
+          eventClick={(event) => history.push("/inbox")}
         />
       </StyledContent>
     </div>

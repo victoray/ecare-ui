@@ -10,21 +10,23 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   hideLoginModal,
   hideSignUpModal,
+  Role,
   selectShowLogin,
   selectShowSignUp,
+  selectUser,
   setToken,
   setUser,
   User,
 } from "./store/auth";
-import { Button, Form, Input, message, Modal, Typography } from "antd";
-import { useMutation } from "react-query";
+import { Button, Form, Input, message, Modal, Select, Typography } from "antd";
+import { useMutation, useQuery } from "react-query";
 import {
   createUserWithEmailAndPassword,
   getAuth,
   onAuthStateChanged,
   signInWithEmailAndPassword,
 } from "firebase/auth";
-import { Api, getMapboxPlaces } from "./api";
+import { Api, getMapboxPlaces, useApi } from "./api";
 import Account from "./views/Account";
 import { useHistory } from "react-router";
 import Calendar from "./views/Calendar";
@@ -33,6 +35,8 @@ import Inbox from "./views/Inbox";
 import { head } from "lodash";
 import { MapBoxFeature, setCareProvider, setFeature } from "./store/search";
 import Footer from "./components/Footer";
+import moment from "moment";
+import styled from "styled-components/macro";
 
 enum Routes {
   Landing = "/",
@@ -71,15 +75,40 @@ const useInitializeSearch = () => {
 const SignUpModal: FC<{ visible: boolean }> = ({ visible }) => {
   const dispatch = useDispatch();
   const history = useHistory();
+  const api = useApi();
+  const user = useSelector(selectUser);
+
+  const { data: roles } = useQuery("roles", () =>
+    api.publicClient.get<string, Array<Role>>("/roles/")
+  );
+
+  const { mutateAsync: updateUser } = useMutation(
+    (data: Partial<User>) => {
+      const formattedData = { ...data };
+      if (formattedData.dateOfBirth) {
+        formattedData.dateOfBirth = moment(formattedData.dateOfBirth).format(
+          "YYYY-MM-DD"
+        );
+      }
+      return api.client.put<any, User>(`/users/${data?.uuid}/`, {
+        ...formattedData,
+      });
+    },
+    {
+      onSuccess: (user) => {
+        dispatch(setUser(user));
+      },
+    }
+  );
 
   const { mutate: signUp, isLoading } = useMutation(
-    ([email, password]: [string, string]) => {
+    ([email, password, role]: [string, string, string]) => {
       const auth = getAuth();
 
       return createUserWithEmailAndPassword(auth, email, password);
     },
     {
-      onSuccess: ({ user }) => {
+      onSuccess: ({ user }, [_, __, role]) => {
         dispatch(hideSignUpModal());
 
         user.getIdToken().then((token) => {
@@ -89,10 +118,7 @@ const SignUpModal: FC<{ visible: boolean }> = ({ visible }) => {
 
           api.client.get<string, User>(`/users/${user.uid}/`).then((user) => {
             dispatch(setUser(user));
-
-            if (!user.role) {
-              history.push(Routes.Account);
-            }
+            updateUser({ ...user, role });
           });
         });
       },
@@ -115,13 +141,28 @@ const SignUpModal: FC<{ visible: boolean }> = ({ visible }) => {
           email: "odinodin161@gmail.com",
           password: "Nnaemeka@07",
         }}
-        onFinish={(values) => signUp([values.email, values.password])}
+        onFinish={(values) =>
+          signUp([values.email, values.password, values.role])
+        }
       >
         <Form.Item name={"email"}>
           <Input type={"email"} placeholder={"Email Address"} required />
         </Form.Item>
         <Form.Item name={"password"}>
           <Input.Password placeholder={"Password"} required />
+        </Form.Item>
+        <Form.Item
+          name={"role"}
+          rules={[{ required: true, message: "Please select a role" }]}
+        >
+          <Select
+            disabled={Boolean(user?.role)}
+            placeholder={"Select role"}
+            options={roles?.map((role) => ({
+              value: role.url,
+              label: role.name,
+            }))}
+          />
         </Form.Item>
 
         <Button type={"primary"} block htmlType={"submit"} loading={isLoading}>
@@ -153,9 +194,6 @@ const LoginModal: FC<{ visible: boolean }> = ({ visible }) => {
             .get<string, User>(`/users/${user.uid}/`)
             .then((user) => {
               dispatch(setUser(user));
-              if (!user.role) {
-                history.push(Routes.Account);
-              }
             })
             .then(() => dispatch(hideLoginModal()));
         });
@@ -198,6 +236,10 @@ const LoginModal: FC<{ visible: boolean }> = ({ visible }) => {
   );
 };
 
+const Container = styled.div`
+  min-height: calc(100vh - 75px);
+`;
+
 function App() {
   useInitializeSearch();
   const dispatch = useDispatch();
@@ -215,9 +257,6 @@ function App() {
 
           api.client.get<string, User>(`/users/${user.uid}/`).then((user) => {
             dispatch(setUser(user));
-            if (!user.role && !window.location.href.includes(Routes.Account)) {
-              window.location.assign(Routes.Account);
-            }
           });
         });
         // ...
@@ -232,15 +271,17 @@ function App() {
       <Router>
         <SignUpModal visible={showSignUpModal} />
         <LoginModal visible={showLoginModal} />
-        <Switch>
-          <Route path={Routes.Account} component={Account} />
-          <Route path={Routes.Calendar} component={Calendar} />
-          <Route path={Routes.Search} component={Search} />
-          <Route path={Routes.Service} component={ServiceDetail} />
-          <Route path={Routes.Services} component={Services} />
-          <Route path={Routes.Inbox} component={Inbox} />
-          <Route path={Routes.Landing} component={Landing} />
-        </Switch>
+        <Container>
+          <Switch>
+            <Route path={Routes.Account} component={Account} />
+            <Route path={Routes.Calendar} component={Calendar} />
+            <Route path={Routes.Search} component={Search} />
+            <Route path={Routes.Service} component={ServiceDetail} />
+            <Route path={Routes.Services} component={Services} />
+            <Route path={Routes.Inbox} component={Inbox} />
+            <Route path={Routes.Landing} component={Landing} />
+          </Switch>
+        </Container>
 
         <Footer />
       </Router>

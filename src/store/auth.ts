@@ -1,6 +1,13 @@
 import { createAction, createReducer } from "@reduxjs/toolkit";
 import type { RootState } from ".";
 
+export type Role = {
+  created_at: string;
+  name: string;
+  type: string;
+  updated_at: string;
+  url: string;
+};
 export type User = {
   uuid: string;
   url: string;

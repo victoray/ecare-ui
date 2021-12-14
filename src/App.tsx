@@ -256,7 +256,6 @@ function App() {
   const dispatch = useDispatch();
   const showSignUpModal = useSelector(selectShowSignUp);
   const showLoginModal = useSelector(selectShowLogin);
-  const history = useHistory();
 
   useEffect(() => {
     const auth = getAuth();
@@ -270,7 +269,7 @@ function App() {
           api.client.get<string, User>(`/users/${user.uid}/`).then((user) => {
             dispatch(setUser(user));
             if (user.roleType === "provider") {
-              history.push("services");
+              window.location.assign("/services");
             }
           });
         });

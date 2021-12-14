@@ -138,10 +138,6 @@ const SignUpModal: FC<{ visible: boolean }> = ({ visible }) => {
     >
       <Typography.Title level={3}> Sign Up</Typography.Title>
       <Form
-        initialValues={{
-          email: "odinodin161@gmail.com",
-          password: "Nnaemeka@07",
-        }}
         onFinish={(values) =>
           signUp([values.email, values.password, values.role])
         }
@@ -176,7 +172,6 @@ const SignUpModal: FC<{ visible: boolean }> = ({ visible }) => {
 
 const LoginModal: FC<{ visible: boolean }> = ({ visible }) => {
   const dispatch = useDispatch();
-  const history = useHistory();
 
   const { mutate: signIn, isLoading } = useMutation(
     ([email, password]: [string, string]) => {
@@ -215,13 +210,7 @@ const LoginModal: FC<{ visible: boolean }> = ({ visible }) => {
     >
       <Typography.Title level={3}>Login</Typography.Title>
 
-      <Form
-        initialValues={{
-          email: "odinodin161@gmail.com",
-          password: "Nnaemeka@07",
-        }}
-        onFinish={(values) => signIn([values.email, values.password])}
-      >
+      <Form onFinish={(values) => signIn([values.email, values.password])}>
         <Form.Item name={"email"}>
           <Input type={"email"} placeholder={"Email Address"} required />
         </Form.Item>

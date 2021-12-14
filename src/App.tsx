@@ -268,9 +268,6 @@ function App() {
 
           api.client.get<string, User>(`/users/${user.uid}/`).then((user) => {
             dispatch(setUser(user));
-            if (user.roleType === "provider") {
-              window.location.assign("/services");
-            }
           });
         });
         // ...
@@ -278,7 +275,7 @@ function App() {
         dispatch(setToken(""));
       }
     });
-  }, [dispatch, history]);
+  }, [dispatch]);
 
   return (
     <div className="App">

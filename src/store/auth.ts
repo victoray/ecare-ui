@@ -3,6 +3,7 @@ import type { RootState } from ".";
 
 export type User = {
   uuid: string;
+  url: string;
   email: string;
   dateOfBirth: string | null;
   emergencyContact: string | null;

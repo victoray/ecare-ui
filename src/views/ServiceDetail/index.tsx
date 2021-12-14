@@ -1,7 +1,7 @@
 import React, { FC, Fragment } from "react";
 import Header from "../../components/Header";
 import { RouteComponentProps, useHistory } from "react-router";
-import { useQuery } from "react-query";
+import { useMutation, useQuery } from "react-query";
 import { useApi } from "../../api";
 import {
   Avatar,
@@ -10,6 +10,7 @@ import {
   Col,
   DatePicker,
   Divider,
+  Form,
   Image,
   Row,
   Spin,
@@ -20,6 +21,7 @@ import styled from "styled-components/macro";
 import { UserOutlined } from "@ant-design/icons";
 import { useSelector } from "react-redux";
 import { selectUser } from "../../store/auth";
+import moment from "moment";
 
 const StyledContent = styled.div`
   margin: 0 auto;
@@ -59,6 +61,17 @@ const ServiceDetail: FC<ServiceDetailProps> = ({ match }) => {
   const { data: service, isLoading } = useQuery(
     [`service-${serviceId}`, api],
     () => api.publicClient.get<any, ServiceType>(`/services/${serviceId}/`)
+  );
+
+  const { mutateAsync: bookAppointment } = useMutation(
+    (data: Record<any, any>) => {
+      return api.client.post("/appointments/", {
+        careProvider: service?.user.url,
+        patient: user?.url,
+        appointmentDate: moment(data.appointmentDate).toISOString(),
+        service: service?.url,
+      });
+    }
   );
 
   const isOwner = user && user.uuid === service?.user.uuid;
@@ -147,11 +160,20 @@ const ServiceDetail: FC<ServiceDetailProps> = ({ match }) => {
                         <Typography.Title level={4}>
                           NGN {service?.pricePerHour} / hour
                         </Typography.Title>
-                        <StyledDatePicker />
-                        <Divider />
-                        <Button type={"primary"} block size={"large"}>
-                          Book Appointment
-                        </Button>
+                        <Form onFinish={bookAppointment}>
+                          <Form.Item name={"appointmentDate"} required>
+                            <StyledDatePicker defaultValue={moment()} />
+                          </Form.Item>
+                          <Divider />
+                          <Button
+                            htmlType={"submit"}
+                            type={"primary"}
+                            block
+                            size={"large"}
+                          >
+                            Book Appointment
+                          </Button>
+                        </Form>
                       </Fragment>
                     )}
                   </Card>

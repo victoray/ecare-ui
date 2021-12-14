@@ -22,6 +22,7 @@ const StyledChatHeader = styled.div`
   display: flex;
   justify-content: space-between;
   border-top: 1px solid #d0d8dc;
+  border-bottom: 1px solid #d0d8dc;
 `;
 
 const StyledTitle = styled.div`

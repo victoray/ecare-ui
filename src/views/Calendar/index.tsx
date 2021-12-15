@@ -59,8 +59,8 @@ const Calendar = () => {
           events={appointments.map((appointment) => ({
             title: `Meeting with ${
               isPatient
-                ? appointment.patient.legalName
-                : appointment.careProvider.legalName
+                ? appointment.careProvider.legalName
+                : appointment.patient.legalName
             }`,
             date: appointment.appointmentDate,
             id: appointment.uuid,

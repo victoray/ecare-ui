@@ -12,6 +12,7 @@ import {
   Divider,
   Form,
   Image,
+  notification,
   Row,
   Spin,
   Typography,
@@ -63,7 +64,7 @@ const ServiceDetail: FC<ServiceDetailProps> = ({ match }) => {
     () => api.publicClient.get<any, ServiceType>(`/services/${serviceId}/`)
   );
 
-  const { mutateAsync: bookAppointment } = useMutation(
+  const { mutateAsync: bookAppointment, isLoading: isBooking } = useMutation(
     (data: Record<any, any>) => {
       return api.client.post("/appointments/", {
         careProvider: service?.user.url,
@@ -71,6 +72,13 @@ const ServiceDetail: FC<ServiceDetailProps> = ({ match }) => {
         appointmentDate: moment(data.appointmentDate).toISOString(),
         service: service?.url,
       });
+    },
+    {
+      onSuccess: () => {
+        notification.success({
+          message: "Appointment Booked",
+        });
+      },
     }
   );
 
@@ -170,6 +178,7 @@ const ServiceDetail: FC<ServiceDetailProps> = ({ match }) => {
                             type={"primary"}
                             block
                             size={"large"}
+                            loading={isBooking}
                           >
                             Book Appointment
                           </Button>

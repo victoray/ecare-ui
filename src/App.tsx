@@ -142,6 +142,12 @@ const SignUpModal: FC<{ visible: boolean }> = ({ visible }) => {
           signUp([values.email, values.password, values.role])
         }
       >
+        <Form.Item
+          name={"legalName"}
+          rules={[{ required: true, message: "Please enter your full name" }]}
+        >
+          <Input placeholder={"Legal Name"} required />
+        </Form.Item>
         <Form.Item name={"email"}>
           <Input type={"email"} placeholder={"Email Address"} required />
         </Form.Item>
@@ -255,9 +261,12 @@ function App() {
 
           const api = new Api(token);
 
-          api.client.get<string, User>(`/users/${user.uid}/`).then((user) => {
-            dispatch(setUser(user));
-          });
+          api.client
+            .get<string, User>(`/users/${user.uid}/`)
+            .then((user) => {
+              dispatch(setUser(user));
+            })
+            .then(() => dispatch(hideLoginModal()));
         });
         // ...
       } else {
